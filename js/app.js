@@ -9,6 +9,8 @@ var allOrgs = store.getAll();
 for (var oi = 0; oi < allOrgs.length; oi++) {
   tracker.record(allOrgs[oi]);
 }
+var achievements = new AchievementTracker(store, tracker);
+var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a.id; });
 
 (function() {
   var $ = function(sel) { return document.querySelector(sel); };
@@ -18,6 +20,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     cacheDOM();
     renderCollection();
     renderJournal();
+    renderAchievements();
     updateBreedingUI();
     bindEvents();
     updateStats();
@@ -41,6 +44,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsRarest    = $('#stats-rarest');
     dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
+    dom.achievementsBody = $('#achievements-body');
     dom.sortSelect     = $('#sort-select');
     dom.oddsPanel      = $('#odds-panel');
     dom.selectToggle   = $('#select-toggle');
@@ -111,6 +115,24 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     if (count === 0 && !dom.bulkBar.classList.contains('hidden')) {
       // keep visible so Cancel button is reachable
     }
+  }
+
+  function renderAchievements() {
+    if (!dom.achievementsBody) return;
+    var all = achievements.getAll();
+    var html = '';
+    for (var ai = 0; ai < all.length; ai++) {
+      var a = all[ai];
+      html += '' +
+        '<div class="achievement-card ' + (a.completed ? 'completed' : 'locked') + '">' +
+          '<div class="achievement-icon">' + (a.completed ? '\u2B50' : '\u25CB') + '</div>' +
+          '<div class="achievement-info">' +
+            '<div class="achievement-name">' + a.name + '</div>' +
+            '<div class="achievement-desc">' + a.desc + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+    dom.achievementsBody.innerHTML = html;
   }
 
   function renderCollection() {
@@ -330,8 +352,17 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     showResults(offspring);
     renderCollection();
     renderJournal();
+    renderAchievements();
     updateBreedingUI();
     updateStats();
+
+    // Check for newly completed achievements
+    var completedNow = achievements.getCompleted().map(function(a) { return a.id; });
+    var newly = achievements.checkNew(_prevAchievementIds);
+    _prevAchievementIds = completedNow;
+    for (var nai = 0; nai < newly.length; nai++) {
+      showNotification('Achievement unlocked: ' + newly[nai].name + '!', 'rare');
+    }
 
     if (newDiscoveries) showNotification('New allele discovered! Check the Journal.', 'discovery');
     if (newMutationCount > 0) showNotification('Mutation! A new allele appears!', 'mutation');
@@ -501,6 +532,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     closeModal();
     renderCollection();
     renderJournal();
+    renderAchievements();
     updateBreedingUI();
     updateStats();
     showNotification('Deleted ' + org.name, 'info');

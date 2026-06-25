@@ -403,6 +403,31 @@ is(expressScent(scentOrg('W','T')), 'Earthy', 'White + Striped = Earthy');
 var mutOrg = { genome: { color:{allele1:'R',allele2:'G'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} } };
 is(expressScent(mutOrg), 'Exotic', 'mutation present = Exotic');
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AchievementTracker
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('AchievementTracker');
+
+var achStore = new OrganismStore();
+var achTracker = new DiscoveryTracker();
+for (var ai = 0; ai < achStore.getAll().length; ai++) achTracker.record(achStore.getAll()[ai]);
+var achievements = new AchievementTracker(achStore, achTracker);
+
+var all = achievements.getAll();
+assert(all.length > 0, 'has achievements defined');
+
+// Each achievement has expected structure
+for (var aj = 0; aj < all.length; aj++) {
+  assert(typeof all[aj].id === 'string', 'achievement ' + aj + ' has id');
+  assert(typeof all[aj].name === 'string', 'achievement ' + aj + ' has name');
+  assert(typeof all[aj].completed === 'boolean', 'achievement ' + aj + ' has completed status');
+}
+
+// Fresh store → should have some incomplete and possibly some complete (starters give some progress)
+var completedCount = 0;
+for (var ak = 0; ak < all.length; ak++) { if (all[ak].completed) completedCount++; }
+assert(completedCount < all.length, 'not all achievements completed on fresh store');
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';
