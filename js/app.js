@@ -64,7 +64,8 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
       (function(org) {
         var card = createOrganismCard(org, 80);
         card.addEventListener('click', function(e) {
-          if (e.target.closest('.card-name')) return; // let rename handle it
+          if (e.target.closest('.card-name')) return;
+          if (e.target.closest('.card-delete')) return;
           showDetail(org);
         });
         var nameEl = card.querySelector('.card-name');
@@ -74,6 +75,15 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
             inlineRename(org, nameEl);
           });
         }
+        var delBtn = document.createElement('button');
+        delBtn.className = 'card-delete';
+        delBtn.textContent = '\u00D7';
+        delBtn.title = 'Delete';
+        delBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          deleteOrganism(org);
+        });
+        card.appendChild(delBtn);
         frag.appendChild(card);
       })(all[i]);
     }
@@ -283,6 +293,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
           '<div class="detail-actions">' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="a">Set as Parent A</button>' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="b">Set as Parent B</button>' +
+            '<button class="btn btn-sm btn-delete" data-id="' + organism.id + '">Delete</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -299,6 +310,28 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
         });
       })(buttons[i]);
     }
+    var delBtn = dom.modalBody.querySelector('.btn-delete');
+    if (delBtn) {
+      delBtn.addEventListener('click', function() {
+        deleteOrganism(organism);
+      });
+    }
+  }
+
+  // ── Delete ─────────────────────────────────────────────────────
+
+  function deleteOrganism(org) {
+    if (!confirm('Delete "' + org.name + '" permanently?')) return;
+    store.remove(org.id);
+    // Clear from parent selection if selected
+    if (dom.parentASelect.value === org.id) { dom.parentASelect.value = ''; }
+    if (dom.parentBSelect.value === org.id) { dom.parentBSelect.value = ''; }
+    closeModal();
+    renderCollection();
+    renderJournal();
+    updateBreedingUI();
+    updateStats();
+    showNotification('Deleted ' + org.name, 'info');
   }
 
   // ── Rename ─────────────────────────────────────────────────────

@@ -178,6 +178,25 @@ is(renameStore.getById(renameId).name, originalName, 'nonexistent id does not af
 renameStore.rename(renameId, '');
 is(renameStore.getById(renameId).name, originalName, 'empty name is ignored');
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OrganismStore: remove
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('OrganismStore.remove');
+
+localStorage.removeItem('gensys_organisms');
+var deleteStore = new OrganismStore();
+var allBefore = deleteStore.getAll();
+var targetId = allBefore[0].id;
+var otherId = allBefore[1].id;
+
+deleteStore.remove(targetId);
+is(deleteStore.getAll().length, allBefore.length - 1, 'removes one organism');
+is(deleteStore.getById(targetId), null, 'removed organism no longer found');
+is(deleteStore.getById(otherId).name, allBefore[1].name, 'other organism remains');
+
+deleteStore.remove('absolutely-not-real');
+is(deleteStore.getAll().length, allBefore.length - 1, 'removing nonexistent id does nothing');
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';

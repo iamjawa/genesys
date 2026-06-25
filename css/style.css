@@ -444,6 +444,40 @@ section h2 {
 }
 .btn-sm:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
 
+/* ── Card Delete Button ────────────────────────────────────────── */
+
+.card-delete {
+  position: absolute;
+  bottom: .2rem;
+  right: .2rem;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(248,81,73,.15);
+  color: var(--red);
+  font-size: .85rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 2;
+}
+.organism-card:hover .card-delete { opacity: 1; }
+.card-delete:hover { background: rgba(248,81,73,.3); }
+
+/* ── Delete button in modals ───────────────────────────────────── */
+
+.btn-delete {
+  background: rgba(248,81,73,.12) !important;
+  color: var(--red) !important;
+}
+.btn-delete:hover { background: rgba(248,81,73,.25) !important; }
+
 /* ── Inline Rename ──────────────────────────────────────────────── */
 
 .inline-rename {
