@@ -200,6 +200,79 @@ section h2 {
 #breed-btn:active:not(:disabled) { transform: scale(.97); }
 #breed-btn:disabled { opacity: .35; cursor: not-allowed; }
 
+/* ── Breeding Odds ──────────────────────────────────────────────── */
+
+.odds-panel {
+  margin-top: .75rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--border);
+}
+
+.odds-title {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .5rem;
+}
+
+.odds-grid {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.odds-gene {
+  flex: 1;
+  min-width: 120px;
+}
+
+.odds-gene-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: .3rem;
+}
+
+.odds-row {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .72rem;
+  margin-bottom: .2rem;
+}
+
+.odds-label {
+  width: 50px;
+  flex-shrink: 0;
+  color: var(--text);
+}
+
+.odds-bar-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.odds-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .3s ease;
+}
+
+.odds-pct {
+  width: 2.5em;
+  text-align: right;
+  color: var(--text-dim);
+  font-family: monospace;
+  font-size: .7rem;
+}
+
 /* ── Results ────────────────────────────────────────────────────── */
 
 #results { min-height: 0; transition: min-height .3s; }

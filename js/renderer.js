@@ -189,12 +189,17 @@ function createOrganismCard(organism, size) {
   var svg = renderOrganismSVG(organism, size || 80);
   var hex = getHex(organism.phenotype.color);
 
+  var scent = expressScent(organism);
+  var scentEmoji = { Sweet:'🌸', Spicy:'🌶', Fresh:'🌿', Earthy:'🌱', Exotic:'✨' };
+  var emoji = scentEmoji[scent] || '🌸';
+
   card.innerHTML = '' +
     '<div class="card-svg">' + svg + '</div>' +
     '<div class="card-name">' + organism.name + '</div>' +
     '<div class="card-traits">' +
       '<span class="trait-dot" style="background:' + hex + '"></span>' +
       '<span class="trait-label">' + organism.phenotype.color + '</span>' +
+      '<span class="trait-scent" title="' + scent + '">' + emoji + '</span>' +
     '</div>' +
     '<div class="card-gen">G' + organism.generation + '</div>' +
     '<div class="card-rarity ' + organism.rarityLabel.toLowerCase() + '">' + organism.rarityLabel + '</div>';

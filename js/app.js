@@ -42,6 +42,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
     dom.sortSelect     = $('#sort-select');
+    dom.oddsPanel      = $('#odds-panel');
     dom.selectToggle   = $('#select-toggle');
     dom.bulkBar        = $('#bulk-bar');
     dom.bulkCount      = $('#bulk-count');
@@ -265,6 +266,39 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     updatePreview(dom.parentASelect, dom.parentAPreview);
     updatePreview(dom.parentBSelect, dom.parentBPreview);
     dom.breedBtn.disabled = !dom.parentASelect.value || !dom.parentBSelect.value;
+    renderOdds();
+  }
+
+  function renderOdds() {
+    if (!dom.oddsPanel) return;
+    var aId = dom.parentASelect.value;
+    var bId = dom.parentBSelect.value;
+    if (!aId || !bId) { dom.oddsPanel.innerHTML = ''; return; }
+    var pA = store.getById(aId);
+    var pB = store.getById(bId);
+    if (!pA || !pB) { dom.oddsPanel.innerHTML = ''; return; }
+    var odds = computeBreedingOdds(pA, pB);
+    var html = '<div class="odds-title">Predicted outcomes</div><div class="odds-grid">';
+    var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
+    var geneTypes = ['color', 'pattern', 'shape'];
+    for (var gi = 0; gi < geneTypes.length; gi++) {
+      var gt = geneTypes[gi];
+      var outcomes = odds[gt];
+      html += '<div class="odds-gene"><div class="odds-gene-label">' + geneLabels[gt] + '</div>';
+      for (var trait in outcomes) {
+        if (outcomes.hasOwnProperty(trait)) {
+          var pct = Math.round(outcomes[trait] * 100);
+          html += '<div class="odds-row">' +
+            '<span class="odds-label">' + trait + '</span>' +
+            '<span class="odds-bar-track"><span class="odds-bar-fill" style="width:' + pct + '%"></span></span>' +
+            '<span class="odds-pct">' + pct + '%</span>' +
+          '</div>';
+        }
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    dom.oddsPanel.innerHTML = html;
   }
 
   // ── Breeding ───────────────────────────────────────────────────
@@ -411,6 +445,11 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
             domInfo('color', 'Color') +
             domInfo('pattern', 'Pattern') +
             domInfo('shape', 'Shape') +
+          '<div class="trait-row">' +
+            '<span class="trait-label">Scent</span>' +
+            '<span class="trait-value">' + expressScent(organism) + '</span>' +
+            '<span class="trait-genotype">polygenic</span>' +
+          '</div>' +
           '</div>' +
           '<div class="detail-actions">' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="a">Set as Parent A</button>' +

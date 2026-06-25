@@ -157,3 +157,58 @@ function getRarityBreakdown(genome) {
   }
   return reasons;
 }
+
+/**
+ * Polygenic trait: Scent
+ * Emerges from the interaction of Color and Pattern genes.
+ * Any mutation in either gene → Exotic.
+ */
+function expressScent(organism) {
+  var genome = organism.genome;
+  var colorTrait = expressGene('color', genome.color.allele1, genome.color.allele2).trait;
+  var patternTrait = expressGene('pattern', genome.pattern.allele1, genome.pattern.allele2).trait;
+
+  var allColor = getAllAllelesForGene('color');
+  var allPattern = getAllAllelesForGene('pattern');
+
+  if ((allColor[genome.color.allele1] && allColor[genome.color.allele1].isMutation) ||
+      (allColor[genome.color.allele2] && allColor[genome.color.allele2].isMutation) ||
+      (allPattern[genome.pattern.allele1] && allPattern[genome.pattern.allele1].isMutation) ||
+      (allPattern[genome.pattern.allele2] && allPattern[genome.pattern.allele2].isMutation)) {
+    return 'Exotic';
+  }
+
+  if (colorTrait === 'Red' && patternTrait === 'Solid') return 'Sweet';
+  if (colorTrait === 'Red' && patternTrait === 'Striped') return 'Spicy';
+  if (colorTrait === 'White' && patternTrait === 'Solid') return 'Fresh';
+  if (colorTrait === 'White' && patternTrait === 'Striped') return 'Earthy';
+
+  // Fallback for other combos (e.g. mutation colors with non-mutation patterns)
+  return 'Earthy';
+}
+
+function computeBreedingOdds(parentA, parentB) {
+  var result = {};
+  var geneTypes = ['color', 'pattern', 'shape'];
+  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
+
+  for (var g = 0; g < geneTypes.length; g++) {
+    var geneType = geneTypes[g];
+    var pa = parentA.genome[geneType];
+    var pb = parentB.genome[geneType];
+    var combos = [
+      [pa.allele1, pb.allele1],
+      [pa.allele1, pb.allele2],
+      [pa.allele2, pb.allele1],
+      [pa.allele2, pb.allele2],
+    ];
+    var tally = {};
+    for (var c = 0; c < combos.length; c++) {
+      var phenotype = expressGene(geneType, combos[c][0], combos[c][1]).trait;
+      if (!tally[phenotype]) tally[phenotype] = 0;
+      tally[phenotype] += 0.25;
+    }
+    result[geneType] = tally;
+  }
+  return result;
+}

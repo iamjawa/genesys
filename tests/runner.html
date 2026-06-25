@@ -360,6 +360,49 @@ assert(overlay.textContent.indexOf('Test Legendary') !== -1, 'overlay contains o
 // Cleanup
 revealEl.innerHTML = '';
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// computeBreedingOdds
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('computeBreedingOdds');
+
+function oddsParent(genome) {
+  return { genome: JSON.parse(JSON.stringify(genome)) };
+}
+
+// RR × WW → 100% Red
+var odds1 = computeBreedingOdds(
+  oddsParent({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} }),
+  oddsParent({ color:{allele1:'W',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} })
+);
+is(Math.abs(odds1.color.Red - 1) < 0.001, true, 'RR×WW → 100% Red');
+is(Math.abs(odds1.color.White - 0) < 0.001, true, 'RR×WW → 0% White');
+
+// RW × RW → 75% Red, 25% White
+var odds2 = computeBreedingOdds(
+  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{alle1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} }),
+  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} })
+);
+is(Math.abs(odds2.color.Red - 0.75) < 0.001, true, 'RW×RW → 75% Red');
+is(Math.abs(odds2.color.White - 0.25) < 0.001, true, 'RW×RW → 25% White');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Polygenic: expressScent
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('expressScent');
+
+function scentOrg(color, pattern) {
+  return { genome: { color:{allele1:color,allele2:color}, pattern:{allele1:pattern,allele2:pattern}, shape:{allele1:'O',allele2:'O'} } };
+}
+
+is(expressScent(scentOrg('R','S')), 'Sweet', 'Red + Solid = Sweet');
+is(expressScent(scentOrg('R','T')), 'Spicy', 'Red + Striped = Spicy');
+is(expressScent(scentOrg('W','S')), 'Fresh', 'White + Solid = Fresh');
+is(expressScent(scentOrg('W','T')), 'Earthy', 'White + Striped = Earthy');
+
+// Mutation in any gene → Exotic
+var mutOrg = { genome: { color:{allele1:'R',allele2:'G'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} } };
+is(expressScent(mutOrg), 'Exotic', 'mutation present = Exotic');
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';
