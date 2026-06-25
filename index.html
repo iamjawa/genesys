@@ -54,12 +54,20 @@
     <section id="collection-section">
       <div class="section-header">
         <h2>🌿 Your Collection</h2>
-        <select id="sort-select" class="sort-select">
-          <option value="discovered">Newest</option>
-          <option value="name">Name A-Z</option>
-          <option value="rarityScore">Rarity</option>
-          <option value="generation">Generation</option>
-        </select>
+        <div class="header-actions">
+          <button id="select-toggle" class="btn btn-sm">Select</button>
+          <select id="sort-select" class="sort-select">
+            <option value="discovered">Newest</option>
+            <option value="name">Name A-Z</option>
+            <option value="rarityScore">Rarity</option>
+            <option value="generation">Generation</option>
+          </select>
+        </div>
+      </div>
+      <div id="bulk-bar" class="bulk-bar hidden">
+        <span id="bulk-count">0 selected</span>
+        <button id="bulk-delete" class="btn btn-sm btn-delete" disabled>Delete selected</button>
+        <button id="bulk-cancel" class="btn btn-sm">Cancel</button>
       </div>
       <div id="collection" class="collection-grid"></div>
     </section>

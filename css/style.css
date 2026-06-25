@@ -526,6 +526,40 @@ section h2 {
 }
 .btn-sm:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
 
+/* ── Select Mode ──────────────────────────────────────────────── */
+
+.header-actions { display: flex; align-items: center; gap: .5rem; }
+
+.card-check {
+  position: absolute;
+  top: .3rem;
+  left: .3rem;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.organism-card.selected {
+  border-color: var(--accent) !important;
+  background: rgba(46,160,67,.08);
+}
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  margin-bottom: .75rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .82rem;
+  color: var(--text-dim);
+}
+.bulk-bar.hidden { display: none; }
+
 /* ── Card Delete Button ────────────────────────────────────────── */
 
 .card-delete {

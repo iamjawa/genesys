@@ -42,6 +42,13 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
     dom.sortSelect     = $('#sort-select');
+    dom.selectToggle   = $('#select-toggle');
+    dom.bulkBar        = $('#bulk-bar');
+    dom.bulkCount      = $('#bulk-count');
+    dom.bulkDelete     = $('#bulk-delete');
+    dom.bulkCancel     = $('#bulk-cancel');
+    dom.selectMode     = false;
+    dom.selectedIds    = {};
   }
 
   function bindEvents() {
@@ -51,9 +58,59 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.parentASelect.addEventListener('change', updateBreedingUI);
     dom.parentBSelect.addEventListener('change', updateBreedingUI);
     if (dom.sortSelect) dom.sortSelect.addEventListener('change', renderCollection);
+    if (dom.selectToggle) dom.selectToggle.addEventListener('click', toggleSelectMode);
+    if (dom.bulkDelete) dom.bulkDelete.addEventListener('click', bulkDeleteSelected);
+    if (dom.bulkCancel) dom.bulkCancel.addEventListener('click', exitSelectMode);
   }
 
   // ── Collection ─────────────────────────────────────────────────
+
+  function toggleSelectMode() {
+    dom.selectMode = !dom.selectMode;
+    if (!dom.selectMode) exitSelectMode();
+    renderCollection();
+    dom.selectToggle.textContent = dom.selectMode ? 'Done' : 'Select';
+  }
+
+  function exitSelectMode() {
+    dom.selectMode = false;
+    dom.selectedIds = {};
+    dom.bulkBar.classList.add('hidden');
+    dom.bulkDelete.disabled = true;
+    dom.bulkCount.textContent = '0 selected';
+    if (dom.selectToggle) dom.selectToggle.textContent = 'Select';
+  }
+
+  function bulkDeleteSelected() {
+    var ids = [];
+    for (var key in dom.selectedIds) {
+      if (dom.selectedIds.hasOwnProperty(key)) ids.push(key);
+    }
+    if (!ids.length) return;
+    if (!confirm('Delete ' + ids.length + ' organism' + (ids.length > 1 ? 's' : '') + ' permanently?')) return;
+    store.removeMultiple(ids);
+    // Clear from parent selection
+    for (var di = 0; di < ids.length; di++) {
+      if (dom.parentASelect.value === ids[di]) dom.parentASelect.value = '';
+      if (dom.parentBSelect.value === ids[di]) dom.parentBSelect.value = '';
+    }
+    exitSelectMode();
+    renderCollection();
+    renderJournal();
+    updateBreedingUI();
+    updateStats();
+    showNotification('Deleted ' + ids.length + ' organism' + (ids.length > 1 ? 's' : ''), 'info');
+  }
+
+  function updateBulkBar() {
+    var count = 0;
+    for (var k in dom.selectedIds) { if (dom.selectedIds.hasOwnProperty(k)) count++; }
+    dom.bulkCount.textContent = count + ' selected';
+    dom.bulkDelete.disabled = count === 0;
+    if (count === 0 && !dom.bulkBar.classList.contains('hidden')) {
+      // keep visible so Cancel button is reachable
+    }
+  }
 
   function renderCollection() {
     dom.collection.innerHTML = '';
@@ -71,6 +128,19 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
         card.addEventListener('click', function(e) {
           if (e.target.closest('.card-name')) return;
           if (e.target.closest('.card-delete')) return;
+          if (e.target.closest('.card-check')) return;
+          if (dom.selectMode) {
+            // Toggle selection
+            if (dom.selectedIds[org.id]) {
+              delete dom.selectedIds[org.id];
+              card.classList.remove('selected');
+            } else {
+              dom.selectedIds[org.id] = true;
+              card.classList.add('selected');
+            }
+            updateBulkBar();
+            return;
+          }
           showDetail(org);
         });
         var nameEl = card.querySelector('.card-name');
@@ -79,6 +149,24 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
             e.stopPropagation();
             inlineRename(org, nameEl);
           });
+        }
+        // Select-mode checkbox
+        if (dom.selectMode) {
+          var chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.className = 'card-check';
+          chk.addEventListener('change', function(e) {
+            e.stopPropagation();
+            if (chk.checked) {
+              dom.selectedIds[org.id] = true;
+              card.classList.add('selected');
+            } else {
+              delete dom.selectedIds[org.id];
+              card.classList.remove('selected');
+            }
+            updateBulkBar();
+          });
+          card.appendChild(chk);
         }
         var delBtn = document.createElement('button');
         delBtn.className = 'card-delete';

@@ -39,25 +39,25 @@ function createStarterOrganisms() {
       { color: { allele1: 'R', allele2: 'R' },
         pattern: { allele1: 'S', allele2: 'S' },
         shape:   { allele1: 'O', allele2: 'O' } },
-      [], 0, 'Flora'
+      [], 0, 'Rose'
     ),
     createOrganism(
       { color: { allele1: 'W', allele2: 'W' },
         pattern: { allele1: 'T', allele2: 'T' },
         shape:   { allele1: 'P', allele2: 'P' } },
-      [], 0, 'Alba'
-    ),
-    createOrganism(
-      { color: { allele1: 'R', allele2: 'W' },
-        pattern: { allele1: 'S', allele2: 'T' },
-        shape:   { allele1: 'O', allele2: 'P' } },
-      [], 0, 'Tiger'
+      [], 0, 'Lily'
     ),
     createOrganism(
       { color: { allele1: 'R', allele2: 'R' },
         pattern: { allele1: 'T', allele2: 'T' },
-        shape:   { allele1: 'O', allele2: 'P' } },
-      [], 0, 'Berry'
+        shape:   { allele1: 'O', allele2: 'O' } },
+      [], 0, 'Tulip'
+    ),
+    createOrganism(
+      { color: { allele1: 'W', allele2: 'W' },
+        pattern: { allele1: 'S', allele2: 'S' },
+        shape:   { allele1: 'P', allele2: 'P' } },
+      [], 0, 'Daisy'
     ),
   ];
 }
@@ -102,6 +102,23 @@ OrganismStore.prototype.add = function(org) { this.organisms.push(org); this.sav
 
 OrganismStore.prototype.addMultiple = function(orgs) {
   for (var i = 0; i < orgs.length; i++) this.organisms.push(orgs[i]);
+  this.save();
+};
+
+OrganismStore.prototype.removeMultiple = function(ids) {
+  if (!ids || !ids.length) return;
+  var keep = {};
+  for (var ri = 0; ri < this.organisms.length; ri++) {
+    keep[this.organisms[ri].id] = true;
+  }
+  for (var rj = 0; rj < ids.length; rj++) {
+    delete keep[ids[rj]];
+  }
+  var filtered = [];
+  for (var rk = 0; rk < this.organisms.length; rk++) {
+    if (keep[this.organisms[rk].id]) filtered.push(this.organisms[rk]);
+  }
+  this.organisms = filtered;
   this.save();
 };
 

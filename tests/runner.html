@@ -233,22 +233,22 @@ suite('OrganismStore.getLineage');
 
 localStorage.removeItem('gensys_organisms');
 var lineageStore = new OrganismStore();
-var flora = lineageStore.getAll()[0];
-var alba  = lineageStore.getAll()[1];
+var rose = lineageStore.getAll()[0];
+var lily = lineageStore.getAll()[1];
 
-var floraLineage = lineageStore.getLineage(flora.id);
-is(floraLineage.length, 0, 'starter organism has empty lineage');
+var roseLineage = lineageStore.getLineage(rose.id);
+is(roseLineage.length, 0, 'starter organism has empty lineage');
 
 // Manually create an offspring referencing the starters
 var baby = createOrganism(
   { color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'} },
-  [flora.id, alba.id], 1
+  [rose.id, lily.id], 1
 );
 lineageStore.add(baby);
 
 var babyLineage = lineageStore.getLineage(baby.id);
 is(babyLineage.length, 2, 'offspring lineage contains both parents');
-is(babyLineage[0].name, flora.name, 'first parent in lineage is correct');
+is(babyLineage[0].name, rose.name, 'first parent in lineage is correct');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Starter organisms
@@ -295,6 +295,47 @@ for (var bi = 0; bi < legBreakdown.length; bi++) {
   if (legBreakdown[bi].indexOf('Color') !== -1) hasColorReason = true;
 }
 assert(hasColorReason, 'legendary breakdown mentions color gene');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Renderer
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('renderOrganismSVG');
+
+// Each shape type should produce unique SVG output
+var baseOrg = { id:'test', name:'T', phenotype:{color:'Red',pattern:'Solid',shape:'Round'}, generation:0, rarityScore:1, rarityLabel:'Common', parents:[], discovered:0, mutations:[], genome:{} };
+var roundSvg  = renderOrganismSVG(baseOrg, 40);
+baseOrg.phenotype.shape = 'Pointed';
+var pointedSvg = renderOrganismSVG(baseOrg, 40);
+baseOrg.phenotype.shape = 'Heart';
+var heartSvg = renderOrganismSVG(baseOrg, 40);
+baseOrg.phenotype.shape = 'Star';
+var starSvg = renderOrganismSVG(baseOrg, 40);
+
+assert(roundSvg.length > 100, 'round SVG has content');
+assert(roundSvg !== pointedSvg, 'round and pointed SVGs differ');
+assert(roundSvg !== heartSvg, 'round and heart SVGs differ');
+assert(roundSvg !== starSvg, 'round and star SVGs differ');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OrganismStore: removeMultiple
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('OrganismStore.removeMultiple');
+
+localStorage.removeItem('gensys_organisms');
+var bulkStore = new OrganismStore();
+var bulkAll = bulkStore.getAll();
+var id1 = bulkAll[0].id;
+var id2 = bulkAll[1].id;
+
+bulkStore.removeMultiple([id1, id2]);
+is(bulkStore.getCount(), 2, 'removed 2 of 4 organisms');
+is(bulkStore.getById(id1), null, 'first organism gone');
+is(bulkStore.getById(id2), null, 'second organism gone');
+
+// Empty array is safe
+var countBefore = bulkStore.getCount();
+bulkStore.removeMultiple([]);
+is(bulkStore.getCount(), countBefore, 'empty array does nothing');
 
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
