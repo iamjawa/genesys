@@ -271,9 +271,24 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
         '</div>';
     }
 
-    var parentInfo = organism.parents.length
-      ? organism.parents.map(function(id) { var p = store.getById(id); return p ? p.name : 'Unknown'; }).join(' \u00D7 ')
-      : 'Wild';
+    var lineage = store.getLineage(organism.id);
+    var lineageHtml = '';
+    if (lineage.length) {
+      lineageHtml = '<div class="lineage">' +
+        '<div class="lineage-label">Parents</div>' +
+        '<div class="lineage-grid">';
+      for (var li = 0; li < lineage.length; li++) {
+        var p = lineage[li];
+        lineageHtml += '' +
+          '<div class="lineage-entry" data-id="' + p.id + '">' +
+            renderOrganismSVG(p, 32) +
+            '<span class="lineage-name">' + p.name + '</span>' +
+          '</div>';
+      }
+      lineageHtml += '</div></div>';
+    } else {
+      lineageHtml = '<div class="lineage"><div class="lineage-label">Wild (original)</div></div>';
+    }
 
     dom.modalBody.innerHTML = '' +
       '<div class="detail-layout">' +
@@ -285,10 +300,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
             '<span>Generation ' + organism.generation + '</span>' +
             '<span>ID: ' + organism.id + '</span>' +
           '</div>' +
-          '<div class="detail-parents">' +
-            '<span class="parents-label">Parents:</span>' +
-            '<span>' + parentInfo + '</span>' +
-          '</div>' +
+          lineageHtml +
           '<div class="detail-traits">' +
             domInfo('color', 'Color') +
             domInfo('pattern', 'Pattern') +
@@ -319,6 +331,17 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
       delBtn.addEventListener('click', function() {
         deleteOrganism(organism);
       });
+    }
+    var lineageEntries = dom.modalBody.querySelectorAll('.lineage-entry');
+    for (var li = 0; li < lineageEntries.length; li++) {
+      (function(entry) {
+        entry.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var pid = entry.dataset.id;
+          var pOrg = store.getById(pid);
+          if (pOrg) showDetail(pOrg);
+        });
+      })(lineageEntries[li]);
     }
   }
 

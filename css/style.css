@@ -449,6 +449,47 @@ section h2 {
   gap: .5rem;
 }
 
+/* ── Lineage ──────────────────────────────────────────────────────── */
+
+.lineage { margin-bottom: .65rem; }
+
+.lineage-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .35rem;
+}
+
+.lineage-grid {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.lineage-entry {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .2rem .4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.lineage-entry:hover { background: rgba(255,255,255,.07); }
+
+.lineage-entry svg { flex-shrink: 0; }
+
+.lineage-name {
+  font-size: .72rem;
+  color: var(--text-dim);
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Buttons ────────────────────────────────────────────────────── */
 
 .btn {

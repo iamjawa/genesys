@@ -125,6 +125,17 @@ OrganismStore.prototype.getAllSorted = function(by) {
   return copy;
 };
 
+OrganismStore.prototype.getLineage = function(id) {
+  var org = this.getById(id);
+  if (!org) return [];
+  var ancestors = [];
+  for (var i = 0; i < org.parents.length; i++) {
+    var p = this.getById(org.parents[i]);
+    if (p) ancestors.push(p);
+  }
+  return ancestors;
+};
+
 OrganismStore.prototype.getMaxGeneration = function() {
   var max = 0;
   for (var i = 0; i < this.organisms.length; i++) {

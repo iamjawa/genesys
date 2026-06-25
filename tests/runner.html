@@ -224,6 +224,30 @@ var byRarity = rarityStore.getAllSorted('rarityScore');
 is(byRarity[0].rarityScore, 3, 'higher rarity comes first');
 is(byRarity[1].rarityScore, 1, 'lower rarity comes second');
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OrganismStore: getLineage
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('OrganismStore.getLineage');
+
+localStorage.removeItem('gensys_organisms');
+var lineageStore = new OrganismStore();
+var flora = lineageStore.getAll()[0];
+var alba  = lineageStore.getAll()[1];
+
+var floraLineage = lineageStore.getLineage(flora.id);
+is(floraLineage.length, 0, 'starter organism has empty lineage');
+
+// Manually create an offspring referencing the starters
+var baby = createOrganism(
+  { color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'} },
+  [flora.id, alba.id], 1
+);
+lineageStore.add(baby);
+
+var babyLineage = lineageStore.getLineage(baby.id);
+is(babyLineage.length, 2, 'offspring lineage contains both parents');
+is(babyLineage[0].name, flora.name, 'first parent in lineage is correct');
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';
