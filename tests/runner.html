@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GENESYS — Test Runner</title>
+<style>
+  body { font: 14px/1.5 system-ui,sans-serif; background: #0d1117; color: #e6edf3; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.2rem; margin-bottom: .5rem; }
+  #summary { display: flex; gap: 1rem; margin-bottom: 1rem; font-size: .9rem; }
+  .pass { color: #2ea043; }
+  .fail { color: #f85149; }
+  #log { font-family: monospace; font-size: .82rem; }
+  #log li { padding: .15rem 0; }
+  #log li.pass { list-style: none; }
+  #log li.fail { list-style: none; color: #f85149; }
+  .suite { font-weight: 700; margin-top: .75rem; color: #8b949e; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+</style>
+</head>
+<body>
+<h1>🧬 GENESYS Test Runner</h1>
+<div id="summary"><span id="pass-count">0</span> passed · <span id="fail-count">0</span> failed</div>
+<ol id="log"></ol>
+
+<script type="module">
+// ── Minimal assertion framework ────────────────────────────────────────
+let passed = 0, failed = 0;
+const log = document.getElementById('log');
+const passCount = document.getElementById('pass-count');
+const failCount = document.getElementById('fail-count');
+
+function suite(name) {
+  const li = document.createElement('li');
+  li.className = 'suite';
+  li.textContent = name;
+  log.appendChild(li);
+}
+
+function assert(ok, msg) {
+  const li = document.createElement('li');
+  if (ok) { passed++; li.className = 'pass'; li.textContent = `✓ ${msg}`; }
+  else { failed++; li.className = 'fail'; li.textContent = `✗ ${msg}`; }
+  log.appendChild(li);
+  passCount.textContent = passed;
+  failCount.textContent = failed;
+}
+
+function is(actual, expected, msg) {
+  assert(actual === expected, `${msg} — expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+}
+
+function isSet(set, val, msg) {
+  assert(set.has(val), `${msg} — set missing ${val}`);
+}
+
+// ── Imports ────────────────────────────────────────────────────────────
+import * as G from '../js/genetics.js';
+import { DiscoveryTracker } from '../js/discovery-tracker.js';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Genetics: expressGene
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('expressGene');
+
+is(G.expressGene('color', 'R', 'W').trait, 'Red', 'R+W = Red (dominant)');
+is(G.expressGene('color', 'R', 'R').trait, 'Red', 'R+R = Red (both dominant)');
+is(G.expressGene('color', 'W', 'W').trait, 'White', 'W+W = White (both recessive)');
+is(G.expressGene('pattern', 'S', 'T').trait, 'Solid', 'S+T = Solid (dominant)');
+is(G.expressGene('pattern', 'T', 'T').trait, 'Striped', 'T+T = Striped (recessive)');
+is(G.expressGene('shape', 'O', 'P').trait, 'Round', 'O+P = Round');
+is(G.expressGene('shape', 'P', 'P').trait, 'Pointed', 'P+P = Pointed');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Genetics: calculateRarity
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('calculateRarity');
+
+is(G.calculateRarity({
+  color:   { allele1: 'R', allele2: 'R' },
+  pattern: { allele1: 'S', allele2: 'S' },
+  shape:   { allele1: 'O', allele2: 'O' },
+}), 1, 'dominant homozygote = Common (1)');
+
+is(G.calculateRarity({
+  color:   { allele1: 'W', allele2: 'W' },
+  pattern: { allele1: 'T', allele2: 'T' },
+  shape:   { allele1: 'P', allele2: 'P' },
+}), 2, 'recessive homozygote = Uncommon (2)');
+
+is(G.calculateRarity({
+  color:   { allele1: 'R', allele2: 'G' },
+  pattern: { allele1: 'S', allele2: 'S' },
+  shape:   { allele1: 'O', allele2: 'O' },
+}), 3, 'mutation present = Rare (3)');
+
+is(G.calculateRarity({
+  color:   { allele1: 'G', allele2: 'G' },
+  pattern: { allele1: 'S', allele2: 'S' },
+  shape:   { allele1: 'O', allele2: 'O' },
+}), 5, 'homozygous mutation = Legendary (5)');
+
+is(G.getRarityLabel(1), 'Common', 'label for 1');
+is(G.getRarityLabel(2), 'Uncommon', 'label for 2');
+is(G.getRarityLabel(3), 'Rare', 'label for 3');
+is(G.getRarityLabel(5), 'Legendary', 'label for 5');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Genetics: breed
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('breed');
+
+function makeParent(c1,c2,p1,p2,s1,s2) {
+  return { genome: { color: {allele1:c1,allele2:c2}, pattern: {allele1:p1,allele2:p2}, shape: {allele1:s1,allele2:s2} } };
+}
+
+const r = G.breed(makeParent('R','R','S','S','O','O'), makeParent('W','W','T','T','P','P'));
+is(r.genome.color.allele1 !== undefined, true, 'genome has color allele1');
+is(r.genome.pattern.allele2 !== undefined, true, 'genome has pattern allele2');
+is(r.genome.shape.allele1 !== undefined, true, 'genome has shape allele1');
+is(typeof r.phenotype.color, 'string', 'phenotype.color is string');
+
+// Identical parents → same phenotype
+const r2 = G.breed(makeParent('R','R','S','S','O','O'), makeParent('R','R','S','S','O','O'));
+is(r2.phenotype.color, 'Red', 'RR+RR = Red');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Genetics: getAllAllelesForGene
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('getAllAllelesForGene');
+
+const allC = G.getAllAllelesForGene('color');
+is(Object.keys(allC).length, 5, '5 color alleles (R,W,G,B,P)');
+is(allC['R'].trait, 'Red', 'R = Red');
+is(allC['W'].trait, 'White', 'W = White');
+is(allC['G'].trait, 'Green', 'G = Green');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DiscoveryTracker
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('DiscoveryTracker');
+
+function mockOrg(genome) {
+  return { genome: JSON.parse(JSON.stringify(genome)), phenotype: {color:'Red',pattern:'Solid',shape:'Round'}, name:'T', id:'t1', parents:[], generation:0, rarityScore:1, rarityLabel:'Common', discovered:Date.now(), mutations:[] };
+}
+
+// Empty tracker
+const t1 = new DiscoveryTracker();
+const a1 = t1.getAll();
+assert(a1.total > 0, 'total alleles > 0');
+is(a1.seen, 0, 'seen = 0 when empty');
+
+// Record organism
+const t2 = new DiscoveryTracker();
+t2.record(mockOrg({ color: {allele1:'R',allele2:'R'}, pattern: {allele1:'S',allele2:'T'}, shape: {allele1:'O',allele2:'P'} }));
+const d2 = t2.getDiscovered();
+isSet(d2.color, 'R', 'color R discovered');
+isSet(d2.pattern, 'S', 'pattern S discovered');
+isSet(d2.pattern, 'T', 'pattern T discovered');
+isSet(d2.shape, 'O', 'shape O discovered');
+isSet(d2.shape, 'P', 'shape P discovered');
+
+// Record returns true/false
+const t3 = new DiscoveryTracker();
+const org3 = mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} });
+assert(t3.record(org3) === true, 'first record returns true');
+assert(t3.record(org3) === false, 'duplicate record returns false');
+
+// ── Done ───────────────────────────────────────────────────────────────
+const total = passed + failed;
+document.querySelector('h1').textContent = `🧬 GENESYS Test Runner — ${passed}/${total} passed`;
+</script>
+</body>
+</html>

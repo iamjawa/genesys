@@ -1,1 +1,1 @@
-node_modules/
+# no build tooling needed — open index.html or tests/runner.html directly
