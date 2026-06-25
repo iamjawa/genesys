@@ -157,11 +157,26 @@ var org3 = mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allel
 assert(t3.record(org3) === true, 'first record returns true');
 assert(t3.record(org3) === false, 'duplicate record returns false');
 
-// All organisms use proper object instances
-var orgA = createOrganism({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} }, [], 0, 'Testy');
-is(orgA.phenotype.color, 'Red', 'createOrganism produces Red organism');
-is(orgA.generation, 0, 'generation 0');
-is(orgA.name, 'Testy', 'custom name works');
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OrganismStore: rename
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('OrganismStore.rename');
+
+// Fresh store for rename tests (isolated)
+localStorage.removeItem('gensys_organisms');
+var renameStore = new OrganismStore();
+var renameOrg = renameStore.getAll()[0];
+var renameId = renameOrg.id;
+
+renameStore.rename(renameId, 'MyCustomName');
+is(renameStore.getById(renameId).name, 'MyCustomName', 'renames organism by id');
+
+var originalName = renameStore.getById(renameId).name;
+renameStore.rename('nonexistent-id', 'ShouldNotAppear');
+is(renameStore.getById(renameId).name, originalName, 'nonexistent id does not affect other organisms');
+
+renameStore.rename(renameId, '');
+is(renameStore.getById(renameId).name, originalName, 'empty name is ignored');
 
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;

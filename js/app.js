@@ -63,7 +63,17 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     for (var i = all.length - 1; i >= 0; i--) {
       (function(org) {
         var card = createOrganismCard(org, 80);
-        card.addEventListener('click', function() { showDetail(org); });
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.card-name')) return; // let rename handle it
+          showDetail(org);
+        });
+        var nameEl = card.querySelector('.card-name');
+        if (nameEl) {
+          nameEl.addEventListener('dblclick', function(e) {
+            e.stopPropagation();
+            inlineRename(org, nameEl);
+          });
+        }
         frag.appendChild(card);
       })(all[i]);
     }
@@ -289,6 +299,38 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
         });
       })(buttons[i]);
     }
+  }
+
+  // ── Rename ─────────────────────────────────────────────────────
+
+  function inlineRename(org, nameEl) {
+    var input = document.createElement('input');
+    input.className = 'inline-rename';
+    input.type = 'text';
+    input.value = org.name;
+    input.maxLength = 30;
+
+    var finish = function() {
+      var val = input.value.trim();
+      if (val && val !== org.name) {
+        store.rename(org.id, val);
+        org.name = val;
+      }
+      nameEl.textContent = org.name;
+      nameEl.style.display = '';
+      input.remove();
+    };
+
+    nameEl.style.display = 'none';
+    nameEl.parentNode.insertBefore(input, nameEl);
+    input.focus();
+    input.select();
+
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = org.name; input.blur(); }
+    });
   }
 
   function closeModal() { dom.modal.classList.remove('visible'); }

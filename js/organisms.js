@@ -102,6 +102,17 @@ OrganismStore.prototype.remove = function(id) {
   this.save();
 };
 
+OrganismStore.prototype.rename = function(id, newName) {
+  if (!newName || !newName.trim()) return;
+  for (var i = 0; i < this.organisms.length; i++) {
+    if (this.organisms[i].id === id) {
+      this.organisms[i].name = newName.trim();
+      this.save();
+      return;
+    }
+  }
+};
+
 OrganismStore.prototype.getCount = function() { return this.organisms.length; };
 
 OrganismStore.prototype.getMaxGeneration = function() {
