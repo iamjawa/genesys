@@ -454,6 +454,19 @@ section h2 {
   gap: .5rem;
 }
 
+/* ── Rarity Breakdown ──────────────────────────────────────────── */
+
+.rarity-breakdown {
+  margin-bottom: .5rem;
+}
+
+.breakdown-line {
+  font-size: .72rem;
+  color: var(--text-dim);
+  padding: .1rem 0;
+}
+.breakdown-line:before { content: '\25B8 '; }
+
 /* ── Lineage ──────────────────────────────────────────────────────── */
 
 .lineage { margin-bottom: .65rem; }

@@ -133,3 +133,27 @@ function getRarityLabel(score) {
   if (score >= 2) return 'Uncommon';
   return 'Common';
 }
+
+function getRarityBreakdown(genome) {
+  var reasons = [];
+  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
+  var geneTypes = ['color', 'pattern', 'shape'];
+  for (var g = 0; g < geneTypes.length; g++) {
+    var geneType = geneTypes[g];
+    var ge = genome[geneType];
+    var all = getAllAllelesForGene(geneType);
+    var a1 = all[ge.allele1];
+    var a2 = all[ge.allele2];
+    var label = geneLabels[geneType];
+
+    if (a1.isMutation && a2.isMutation && ge.allele1 === ge.allele2) {
+      reasons.push(label + ': homozygous mutation (' + ge.allele1 + '/' + ge.allele2 + ') \u2192 Legendary');
+    } else if (a1.isMutation || a2.isMutation) {
+      var mut = a1.isMutation ? ge.allele1 : ge.allele2;
+      reasons.push(label + ': carries mutation allele ' + mut + ' \u2192 Rare');
+    } else if (!a1.dominant && !a2.dominant && ge.allele1 === ge.allele2) {
+      reasons.push(label + ': homozygous recessive (' + ge.allele1 + '/' + ge.allele2 + ') \u2192 Uncommon');
+    }
+  }
+  return reasons;
+}

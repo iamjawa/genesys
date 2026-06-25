@@ -291,12 +291,23 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
       lineageHtml = '<div class="lineage"><div class="lineage-label">Wild (original)</div></div>';
     }
 
+    var breakdown = getRarityBreakdown(organism.genome);
+    var breakdownHtml = '';
+    if (breakdown.length) {
+      breakdownHtml = '<div class="rarity-breakdown">';
+      for (var bi = 0; bi < breakdown.length; bi++) {
+        breakdownHtml += '<div class="breakdown-line">' + breakdown[bi] + '</div>';
+      }
+      breakdownHtml += '</div>';
+    }
+
     dom.modalBody.innerHTML = '' +
       '<div class="detail-layout">' +
         '<div class="detail-svg">' + svg + '</div>' +
         '<div class="detail-info">' +
           '<h2 class="detail-name">' + organism.name + '</h2>' +
           '<div class="detail-rarity ' + organism.rarityLabel.toLowerCase() + '">' + organism.rarityLabel + '</div>' +
+          breakdownHtml +
           '<div class="detail-meta">' +
             '<span>Generation ' + organism.generation + '</span>' +
             '<span>ID: ' + organism.id + '</span>' +
