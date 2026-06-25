@@ -40,6 +40,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsGen       = $('#stats-gen');
     dom.statsRarest    = $('#stats-rarest');
     dom.journalBody    = $('#journal-body');
+    dom.sortSelect     = $('#sort-select');
   }
 
   function bindEvents() {
@@ -48,13 +49,16 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.modal.addEventListener('click', function(e) { if (e.target === dom.modal) closeModal(); });
     dom.parentASelect.addEventListener('change', updateBreedingUI);
     dom.parentBSelect.addEventListener('change', updateBreedingUI);
+    if (dom.sortSelect) dom.sortSelect.addEventListener('change', renderCollection);
   }
 
   // ── Collection ─────────────────────────────────────────────────
 
   function renderCollection() {
     dom.collection.innerHTML = '';
-    var all = store.getAll();
+    var sortBy = dom.sortSelect ? dom.sortSelect.value : 'discovered';
+    var all = sortBy === 'discovered' ? store.getAll() : store.getAllSorted(sortBy);
+    if (sortBy === 'discovered') all = all.reverse();
     if (!all.length) {
       dom.collection.innerHTML = '<div class="empty-state">No organisms yet. Start breeding!</div>';
       return;

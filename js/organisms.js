@@ -115,6 +115,16 @@ OrganismStore.prototype.rename = function(id, newName) {
 
 OrganismStore.prototype.getCount = function() { return this.organisms.length; };
 
+OrganismStore.prototype.getAllSorted = function(by) {
+  var copy = this.organisms.slice();
+  copy.sort(function(a, b) {
+    var va = a[by], vb = b[by];
+    if (typeof va === 'string') return va.localeCompare(vb);
+    return vb - va; // numeric: descending (highest first)
+  });
+  return copy;
+};
+
 OrganismStore.prototype.getMaxGeneration = function() {
   var max = 0;
   for (var i = 0; i < this.organisms.length; i++) {

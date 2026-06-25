@@ -197,6 +197,33 @@ is(deleteStore.getById(otherId).name, allBefore[1].name, 'other organism remains
 deleteStore.remove('absolutely-not-real');
 is(deleteStore.getAll().length, allBefore.length - 1, 'removing nonexistent id does nothing');
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OrganismStore: getAllSorted
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('OrganismStore.getAllSorted');
+
+localStorage.removeItem('gensys_organisms');
+var sortStore = new OrganismStore();
+sortStore.getAll()[0].name = 'Zara';
+sortStore.getAll()[1].name = 'Able';
+
+var byName = sortStore.getAllSorted('name');
+is(byName.length, 2, 'returns all organisms');
+is(byName[0].name, 'Able', 'Able comes first alphabetically');
+is(byName[1].name, 'Zara', 'Zara comes second');
+
+// Create organisms with different rarity for sorting test
+localStorage.removeItem('gensys_organisms');
+var rarityStore = new OrganismStore();
+var commonOrg = rarityStore.getAll()[0];
+var rareOrg = rarityStore.getAll()[1];
+rareOrg.rarityScore = 3;
+rareOrg.rarityLabel = 'Rare';
+
+var byRarity = rarityStore.getAllSorted('rarityScore');
+is(byRarity[0].rarityScore, 3, 'higher rarity comes first');
+is(byRarity[1].rarityScore, 1, 'lower rarity comes second');
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';

@@ -98,6 +98,29 @@ section h2 {
   margin-bottom: 1rem;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: .75rem;
+}
+.section-header h2 { margin-bottom: 0; }
+
+.sort-select {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: .35rem .6rem;
+  font-size: .78rem;
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+}
+.sort-select:focus { border-color: var(--accent); }
+.sort-select option { background: #161b22; color: var(--text); }
+
 /* ── Breeding Station ───────────────────────────────────────────── */
 
 .breeding-panel {

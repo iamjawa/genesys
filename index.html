@@ -51,7 +51,15 @@
 
     <!-- Collection -->
     <section id="collection-section">
-      <h2>🌿 Your Collection</h2>
+      <div class="section-header">
+        <h2>🌿 Your Collection</h2>
+        <select id="sort-select" class="sort-select">
+          <option value="discovered">Newest</option>
+          <option value="name">Name A-Z</option>
+          <option value="rarityScore">Rarity</option>
+          <option value="generation">Generation</option>
+        </select>
+      </div>
       <div id="collection" class="collection-grid"></div>
     </section>
 
