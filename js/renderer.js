@@ -1,22 +1,12 @@
 /**
  * GENESYS — Renderer
  * ====================
- * Converts an organism into an SVG flower and into DOM cards.
- *
- * Flower anatomy:
- *   • 6 petals arranged in a circle — shape varies by shape gene
- *   • Petal fill colour — determined by colour gene
- *   • Pattern overlay — stripes, dots, or spots from pattern gene
- *   • Centre disc — slightly lighter shade
- *   • Subtle stem
+ * Converts an organism into an SVG flower and DOM cards.
  */
 
 const COLOR_HEX = {
-  Red:    '#e74c3c',
-  White:  '#e8e8e8',
-  Green:  '#2ecc71',
-  Blue:   '#3498db',
-  Purple: '#9b59b6',
+  Red: '#e74c3c', White: '#e8e8e8', Green: '#2ecc71',
+  Blue: '#3498db', Purple: '#9b59b6',
 };
 
 function hexShift(hex, amount) {
@@ -29,19 +19,16 @@ function hexShift(hex, amount) {
 
 function getHex(trait) { return COLOR_HEX[trait] || '#e74c3c'; }
 
-// ── SVG flower ─────────────────────────────────────────────────────────────
-
-function renderOrganismSVG(organism, size) {
+export function renderOrganismSVG(organism, size) {
   const { color, pattern, shape } = organism.phenotype;
-  const fill   = getHex(color);
+  const fill = getHex(color);
   const stroke = hexShift(fill, -40);
-  const light  = hexShift(fill, 50);
+  const light = hexShift(fill, 50);
 
   const CX = 50, CY = 50, petalDist = 27, petalR = 16, stemH = 18;
 
   let svg = `<svg viewBox="0 0 100 ${100 + stemH}" width="${size}" height="${Math.round(size * (100 + stemH) / 100)}" xmlns="http://www.w3.org/2000/svg">`;
 
-  // ── Petals ──
   for (let i = 0; i < 6; i++) {
     const deg = i * 60;
     const rad = (deg - 90) * Math.PI / 180;
@@ -50,14 +37,11 @@ function renderOrganismSVG(organism, size) {
 
     if (shape === 'Round') {
       svg += `<circle cx="${px}" cy="${py}" r="${petalR}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" opacity=".92"/>`;
-
     } else if (shape === 'Pointed') {
       svg += `<ellipse cx="${px}" cy="${py}" rx="${petalR * 0.45}" ry="${petalR * 0.95}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" opacity=".92" transform="rotate(${deg}, ${px}, ${py})"/>`;
-
     } else if (shape === 'Heart') {
       const s = petalR * 0.7;
       svg += `<path d="M${px},${py + s * 0.35} C${px + s * 0.85},${py - s * 0.35} ${px + s * 1.15},${py + s * 0.3} ${px},${py + s * 0.9} C${px - s * 1.15},${py + s * 0.3} ${px - s * 0.85},${py - s * 0.35} ${px},${py + s * 0.35}Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5" opacity=".92"/>`;
-
     } else if (shape === 'Star') {
       const outer = petalR * 0.85, inner = outer * 0.4;
       let pts = '';
@@ -71,35 +55,26 @@ function renderOrganismSVG(organism, size) {
     }
   }
 
-  // ── Pattern overlay ──
   if (pattern !== 'Solid') {
     const pid = `${organism.id}_${pattern}`;
-    let patternSvg = '';
+    let def = '';
     if (pattern === 'Striped') {
-      patternSvg = `<pattern id="${pid}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="${stroke}" stroke-width="1.5" opacity=".35"/></pattern>`;
+      def = `<pattern id="${pid}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="${stroke}" stroke-width="1.5" opacity=".35"/></pattern>`;
     } else if (pattern === 'Dotted') {
-      patternSvg = `<pattern id="${pid}" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="2.5" fill="${stroke}" opacity=".4"/></pattern>`;
+      def = `<pattern id="${pid}" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="2.5" fill="${stroke}" opacity=".4"/></pattern>`;
     } else if (pattern === 'Spotted') {
-      patternSvg = `<pattern id="${pid}" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r="4.5" fill="${stroke}" opacity=".35"/></pattern>`;
+      def = `<pattern id="${pid}" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r="4.5" fill="${stroke}" opacity=".35"/></pattern>`;
     }
-    if (patternSvg) {
-      svg += `<defs>${patternSvg}</defs><circle cx="${CX}" cy="${CY}" r="46" fill="url(#${pid})"/>`;
-    }
+    if (def) svg += `<defs>${def}</defs><circle cx="${CX}" cy="${CY}" r="46" fill="url(#${pid})"/>`;
   }
 
-  // ── Center ──
   svg += `<circle cx="${CX}" cy="${CY}" r="9" fill="${light}" stroke="${stroke}" stroke-width="2"/>`;
-
-  // ── Stem ──
   svg += `<path d="M${CX},${CY + 5} Q${CX - 3},${CY + 30} ${CX},${100 + stemH}" fill="none" stroke="#3d6b4f" stroke-width="3" opacity=".55"/>`;
-
   svg += `</svg>`;
   return svg;
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────
-
-function createOrganismCard(organism, size) {
+export function createOrganismCard(organism, size) {
   const card = document.createElement('div');
   card.className = `organism-card rarity-${organism.rarityLabel.toLowerCase()}`;
   card.dataset.id = organism.id;

@@ -2,19 +2,9 @@
  * GENESYS — Organism Management
  * ===============================
  * Factory, persistence (localStorage), and starter-generation.
- *
- * Each organism record:
- *   id          — unique string
- *   name        — display label
- *   genome      — { color: {allele1, allele2}, pattern: …, shape: … }
- *   phenotype   — { color, pattern, shape }  (expressed trait names)
- *   parents     — [parentIdA, parentIdB]  (empty for starters)
- *   generation  — 0 for starters
- *   rarityScore — 1–5
- *   rarityLabel — Common / Uncommon / Rare / Legendary
- *   discovered  — Date.now()
- *   mutations   — [{ gene, allele }]  (only populated for offspring)
  */
+
+import { expressGene, calculateRarity, getRarityLabel } from './genetics.js';
 
 let _idCounter = 0;
 
@@ -22,9 +12,7 @@ function generateId() {
   return `org_${Date.now().toString(36)}_${++_idCounter}`;
 }
 
-// ── Factory ────────────────────────────────────────────────────────────────
-
-function createOrganism(genome, parentIds = [], generation = 0, name) {
+export function createOrganism(genome, parentIds = [], generation = 0, name) {
   const phenotype = {
     color:  expressGene('color',   genome.color.allele1,   genome.color.allele2).trait,
     pattern: expressGene('pattern', genome.pattern.allele1, genome.pattern.allele2).trait,
@@ -45,8 +33,6 @@ function createOrganism(genome, parentIds = [], generation = 0, name) {
   };
 }
 
-// ── Starters ───────────────────────────────────────────────────────────────
-
 function createStarterOrganisms() {
   return [
     createOrganism(
@@ -64,9 +50,7 @@ function createStarterOrganisms() {
   ];
 }
 
-// ── Store (localStorage) ──────────────────────────────────────────────────
-
-class OrganismStore {
+export class OrganismStore {
   constructor() {
     this.organisms = [];
     this.load();
@@ -115,8 +99,7 @@ class OrganismStore {
 
   getRarest() {
     return this.organisms.reduce(
-      (best, o) => (o.rarityScore > (best ? best.rarityScore : -1) ? o : best),
-      null
+      (best, o) => (o.rarityScore > (best ? best.rarityScore : -1) ? o : best), null
     );
   }
 }

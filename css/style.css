@@ -479,6 +479,99 @@ section h2 {
 .notif-rare     { border-color: var(--purple); }
 .notif-info     { border-color: rgba(88,166,255,.3); }
 
+/* ── Trait Journal ─────────────────────────────────────────────── */
+
+.journal-summary {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+  font-size: .85rem;
+  color: var(--text-dim);
+}
+
+.journal-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,.08);
+  border-radius: 3px;
+  overflow: hidden;
+  max-width: 200px;
+}
+
+.journal-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  border-radius: 3px;
+  transition: width .4s ease;
+}
+
+.journal-pct {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 2.5em;
+}
+
+.journal-grid {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.journal-gene {
+  flex: 1;
+  min-width: 130px;
+}
+
+.journal-gene-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .4rem;
+}
+
+.journal-alleles {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+.journal-allele {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  padding: .2rem .5rem;
+  border-radius: 4px;
+  transition: background var(--transition);
+}
+
+.journal-allele.found {
+  background: rgba(46,160,67,.1);
+  color: var(--text);
+}
+
+.journal-allele.hidden {
+  background: rgba(255,255,255,.03);
+  color: var(--text-dim);
+  opacity: .5;
+}
+
+.journal-allele-code {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-size: .75rem;
+  font-weight: 700;
+  width: 1.4em;
+  text-align: center;
+}
+
+/* ── Notification types ───────────────────────────────────────── */
+
+.notif-discovery { border-color: var(--accent); }
+
 /* ── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {

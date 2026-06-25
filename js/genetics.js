@@ -20,7 +20,7 @@
  *        P (Pointed, rec)
  */
 
-const GENES = {
+export const GENES = {
   color: {
     name: 'Color',
     baseAlleles: {
@@ -57,13 +57,10 @@ const GENES = {
   },
 };
 
-const MUTATION_CHANCE = 0.03; // 3 % per gene
+export const MUTATION_CHANCE = 0.03;
 
-/**
- * Return every possible allele (base + mutation) for a gene type,
- * keyed by single-letter code.
- */
-function getAllAllelesForGene(geneType) {
+/** Return every possible allele (base + mutation) for a gene type. */
+export function getAllAllelesForGene(geneType) {
   const gene = GENES[geneType];
   const map = {};
   for (const [code, info] of Object.entries(gene.baseAlleles)) {
@@ -71,54 +68,44 @@ function getAllAllelesForGene(geneType) {
   }
   for (const m of gene.mutationPool) {
     map[m.allele] = {
-      trait: m.trait,
-      dominant: m.dominant,
-      hex: m.hex,
-      code: m.allele,
-      isMutation: true,
+      trait: m.trait, dominant: m.dominant, hex: m.hex,
+      code: m.allele, isMutation: true,
     };
   }
   return map;
 }
 
-/**
- * Given a gene type and two allele codes, return the expressed
- * phenotype info object.  Dominant beats recessive.
- */
-function expressGene(geneType, allele1, allele2) {
+/** Return the expressed phenotype info object for a gene pair. Dominant beats recessive. */
+export function expressGene(geneType, allele1, allele2) {
   const all = getAllAllelesForGene(geneType);
   const a1 = all[allele1];
   const a2 = all[allele2];
   if (!a1 || !a2) return a1 || a2;
   if (a1.dominant) return a1;
   if (a2.dominant) return a2;
-  return a1; // both recessive → first
+  return a1;
 }
 
-/**
- * Randomly pick one allele from a parent's genome for a given gene.
- */
-function pickRandomAllele(genome) {
+/** Randomly pick one allele from a parent's genome for a given gene. */
+export function pickRandomAllele(genome) {
   return Math.random() < 0.5 ? genome.allele1 : genome.allele2;
 }
 
-/**
- * Return a random mutation allele from the mutation pool.
- */
-function getRandomMutation(geneType) {
+/** Return a random mutation allele from the mutation pool. */
+export function getRandomMutation(geneType) {
   const pool = GENES[geneType].mutationPool;
   return pool[Math.floor(Math.random() * pool.length)].allele;
 }
 
 /**
- * Breed two parent organisms → offspring genome, phenotype, mutation info.
+ * Breed two parent organisms → offspring genome & phenotype.
  *
  * For each gene:
  *   1. Pick one random allele from each parent.
  *   2. With MUTATION_CHANCE, replace one allele with a novel mutation.
  *   3. Express the phenotype via dominant/recessive rules.
  */
-function breed(parentA, parentB) {
+export function breed(parentA, parentB) {
   const genome = {};
   const mutations = [];
 
@@ -142,25 +129,17 @@ function breed(parentA, parentB) {
     shape:  expressGene('shape',   genome.shape.allele1,   genome.shape.allele2).trait,
   };
 
-  const rarity = calculateRarity(genome);
-
-  return {
-    genome,
-    phenotype,
-    mutations,
-    hasMutation: mutations.length > 0,
-    rarity,
-  };
+  return { genome, phenotype, mutations, hasMutation: mutations.length > 0 };
 }
 
 /**
  * Rarity scoring:
  *   1 = Common       (standard dominant alleles)
- *   2 = Uncommon     (homozygous recessive of base alleles)  
+ *   2 = Uncommon     (homozygous recessive of base alleles)
  *   3 = Rare         (at least one mutation allele present)
  *   5 = Legendary    (homozygous mutation — both alleles same mutation)
  */
-function calculateRarity(genome) {
+export function calculateRarity(genome) {
   let score = 1;
   for (const geneType of ['color', 'pattern', 'shape']) {
     const g = genome[geneType];
@@ -179,7 +158,7 @@ function calculateRarity(genome) {
   return score;
 }
 
-function getRarityLabel(score) {
+export function getRarityLabel(score) {
   if (score >= 5) return 'Legendary';
   if (score >= 3) return 'Rare';
   if (score >= 2) return 'Uncommon';

@@ -2,25 +2,29 @@
  * GENESYS — Application
  * ======================
  * Glues together the genetics engine, organism store, and renderer.
- *
- * Lifecycle:
- *   1. On load, restore or create starter organisms
- *   2. Render collection grid
- *   3. Player picks two parents via dropdowns, clicks BREED
- *   4. Offspring are generated, saved, and shown in the results panel
- *   5. Clicking a card opens a detail modal with genotype info
  */
 
+import { expressGene, breed, getAllAllelesForGene } from './genetics.js';
+import { OrganismStore, createOrganism } from './organisms.js';
+import { renderOrganismSVG, createOrganismCard } from './renderer.js';
+import { DiscoveryTracker } from './discovery-tracker.js';
+
 const store = new OrganismStore();
+const tracker = new DiscoveryTracker();
+
+// Replay existing organisms into the tracker
+for (const org of store.getAll()) {
+  tracker.record(org);
+}
 
 const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
 
 const dom = {};
 
 function init() {
   cacheDOM();
   renderCollection();
+  renderJournal();
   updateBreedingUI();
   bindEvents();
   updateStats();
@@ -42,28 +46,26 @@ function cacheDOM() {
   dom.statsCount     = $('#stats-count');
   dom.statsGen       = $('#stats-gen');
   dom.statsRarest    = $('#stats-rarest');
+  dom.journalBody    = $('#journal-body');
 }
 
 function bindEvents() {
   dom.breedBtn.addEventListener('click', handleBreed);
   dom.modalClose.addEventListener('click', closeModal);
   dom.modal.addEventListener('click', (e) => { if (e.target === dom.modal) closeModal(); });
-
   dom.parentASelect.addEventListener('change', updateBreedingUI);
   dom.parentBSelect.addEventListener('change', updateBreedingUI);
 }
 
-// ── Collection ────────────────────────────────────────────────────────────
+// ── Collection ───────────────────────────────────────────────────────
 
 function renderCollection() {
   dom.collection.innerHTML = '';
   const all = store.getAll();
   if (!all.length) {
-    dom.collection.innerHTML = `<div class="empty-state">No organisms yet. Start breeding!</div>`;
+    dom.collection.innerHTML = '<div class="empty-state">No organisms yet. Start breeding!</div>';
     return;
   }
-
-  // Show newest first
   const frag = document.createDocumentFragment();
   for (const org of [...all].reverse()) {
     const card = createOrganismCard(org, 80);
@@ -73,7 +75,50 @@ function renderCollection() {
   dom.collection.appendChild(frag);
 }
 
-// ── Breeding UI ──────────────────────────────────────────────────────────
+// ── Trait Journal ────────────────────────────────────────────────────
+
+function renderJournal() {
+  if (!dom.journalBody) return;
+
+  const allAlleles = tracker.getAll();
+  const discovered = tracker.getDiscovered();
+  const total = allAlleles.total;
+  const seen = allAlleles.seen;
+  const pct = total > 0 ? Math.round((seen / total) * 100) : 0;
+
+  dom.journalBody.innerHTML = `
+    <div class="journal-summary">
+      <span class="journal-progress">${seen} / ${total} alleles</span>
+      <span class="journal-bar"><span class="journal-fill" style="width:${pct}%"></span></span>
+      <span class="journal-pct">${pct}%</span>
+    </div>
+    <div class="journal-grid">
+      ${renderGeneGroup('color',   'Color',   allAlleles, discovered)}
+      ${renderGeneGroup('pattern', 'Pattern', allAlleles, discovered)}
+      ${renderGeneGroup('shape',   'Shape',   allAlleles, discovered)}
+    </div>
+  `;
+}
+
+function renderGeneGroup(geneType, label, allAlleles, discovered) {
+  const gene = allAlleles.genes[geneType];
+  if (!gene) return '';
+  const entries = gene.map(a => {
+    const found = discovered[geneType] && discovered[geneType].has(a.code);
+    return `
+      <div class="journal-allele ${found ? 'found' : 'hidden'}">
+        <span class="journal-allele-code">${a.code}</span>
+        <span class="journal-allele-name">${found ? a.trait : '???'}</span>
+      </div>`;
+  }).join('');
+  return `
+    <div class="journal-gene">
+      <div class="journal-gene-label">${label}</div>
+      <div class="journal-alleles">${entries}</div>
+    </div>`;
+}
+
+// ── Breeding UI ──────────────────────────────────────────────────────
 
 function updatePreview(selectEl, previewEl) {
   const id = selectEl.value;
@@ -83,11 +128,8 @@ function updatePreview(selectEl, previewEl) {
 }
 
 function updateBreedingUI() {
-  // Build both dropdowns (prevent same organism on both sides)
   const aId = dom.parentASelect.value;
-  const bId = dom.parentBSelect.value;
 
-  // Parent A
   dom.parentASelect.innerHTML = '<option value="">— Select —</option>';
   for (const org of store.getAll()) {
     const opt = document.createElement('option');
@@ -97,7 +139,7 @@ function updateBreedingUI() {
   }
   if (aId && store.getById(aId)) dom.parentASelect.value = aId;
 
-  // Parent B (exclude selected Parent A)
+  const bId = dom.parentBSelect.value;
   dom.parentBSelect.innerHTML = '<option value="">— Select —</option>';
   for (const org of store.getAll()) {
     if (org.id === dom.parentASelect.value) continue;
@@ -110,11 +152,10 @@ function updateBreedingUI() {
 
   updatePreview(dom.parentASelect, dom.parentAPreview);
   updatePreview(dom.parentBSelect, dom.parentBPreview);
-
   dom.breedBtn.disabled = !dom.parentASelect.value || !dom.parentBSelect.value;
 }
 
-// ── Breeding ──────────────────────────────────────────────────────────────
+// ── Breeding ─────────────────────────────────────────────────────────
 
 function handleBreed() {
   const pA = store.getById(dom.parentASelect.value);
@@ -124,6 +165,7 @@ function handleBreed() {
   const count = 1 + Math.floor(Math.random() * 3);
   const offspring = [];
   let newMutationCount = 0;
+  let newDiscoveries = false;
 
   for (let i = 0; i < count; i++) {
     const result = breed(pA, pB);
@@ -132,6 +174,10 @@ function handleBreed() {
     org.mutations = result.mutations;
     org.hasMutation = result.hasMutation;
     if (result.hasMutation) newMutationCount += result.mutations.length;
+
+    const fresh = tracker.record(org);
+    if (fresh) newDiscoveries = true;
+
     offspring.push(org);
   }
 
@@ -139,20 +185,16 @@ function handleBreed() {
 
   showResults(offspring);
   renderCollection();
+  renderJournal();
   updateBreedingUI();
   updateStats();
 
-  // Notifications
-  if (newMutationCount > 0) {
-    showNotification('🧬 Mutation discovered! A new allele appears!', 'mutation');
-  }
+  if (newDiscoveries) showNotification('📖 New allele discovered! Check the Journal.', 'discovery');
+  if (newMutationCount > 0) showNotification('🧬 Mutation! A new allele appears!', 'mutation');
   const rares = offspring.filter(o => o.rarityLabel === 'Rare');
   const legs  = offspring.filter(o => o.rarityLabel === 'Legendary');
-  if (legs.length) {
-    showNotification('🌟 Legendary organism discovered!', 'rare');
-  } else if (rares.length) {
-    showNotification('✨ Rare organism discovered!', 'rare');
-  }
+  if (legs.length) showNotification('🌟 Legendary organism discovered!', 'rare');
+  else if (rares.length) showNotification('✨ Rare organism discovered!', 'rare');
 }
 
 function showResults(offspring) {
@@ -164,7 +206,6 @@ function showResults(offspring) {
 
   const grid = document.createElement('div');
   grid.className = 'offspring-grid';
-
   for (const org of offspring) {
     const card = createOrganismCard(org, 80);
     card.addEventListener('click', () => showDetail(org));
@@ -180,16 +221,15 @@ function showResults(offspring) {
   dom.results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ── Detail Modal ─────────────────────────────────────────────────────────
+// ── Detail Modal ─────────────────────────────────────────────────────
 
 function showDetail(organism) {
   dom.modalBody.innerHTML = '';
   dom.modal.classList.add('visible');
 
   const svg = renderOrganismSVG(organism, 130);
-
-  // Genotype display
   const g = organism.genome;
+
   const domInfo = (geneType, label) => {
     const all = getAllAllelesForGene(geneType);
     const a1 = all[g[geneType].allele1];
@@ -204,10 +244,7 @@ function showDetail(organism) {
   };
 
   const parentInfo = organism.parents.length
-    ? organism.parents.map(id => {
-        const p = store.getById(id);
-        return p ? p.name : 'Unknown';
-      }).join(' × ')
+    ? organism.parents.map(id => { const p = store.getById(id); return p ? p.name : 'Unknown'; }).join(' × ')
     : 'Wild';
 
   dom.modalBody.innerHTML = `
@@ -248,20 +285,14 @@ function showDetail(organism) {
   });
 }
 
-function closeModal() {
-  dom.modal.classList.remove('visible');
-}
-
-// ── Stats ─────────────────────────────────────────────────────────────────
+function closeModal() { dom.modal.classList.remove('visible'); }
 
 function updateStats() {
   dom.statsCount.textContent = store.getCount();
-  dom.statsGen.textContent   = store.getMaxGeneration();
+  dom.statsGen.textContent = store.getMaxGeneration();
   const r = store.getRarest();
   dom.statsRarest.textContent = r ? r.rarityLabel : '—';
 }
-
-// ── Notifications ─────────────────────────────────────────────────────────
 
 function showNotification(message, type) {
   const el = document.createElement('div');
@@ -274,7 +305,5 @@ function showNotification(message, type) {
     setTimeout(() => el.remove(), 400);
   }, 4000);
 }
-
-// ── Boot ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', init);
