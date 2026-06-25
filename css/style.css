@@ -734,6 +734,88 @@ section h2 {
   text-align: center;
 }
 
+/* ── Legendary Reveal ──────────────────────────────────────────── */
+
+.legendary-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(6px);
+  animation: legendary-reveal-in .4s ease;
+}
+
+@keyframes legendary-reveal-in {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.legendary-overlay.legendary-fadeout {
+  animation: legendary-reveal-out .5s ease forwards;
+}
+
+@keyframes legendary-reveal-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.3); }
+}
+
+.legendary-flower {
+  animation: legendary-flower-bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes legendary-flower-bounce {
+  from { transform: scale(1) rotate(-5deg); }
+  to   { transform: scale(1.15) rotate(5deg); }
+}
+
+.legendary-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  background: linear-gradient(135deg, #bc8cff, #f1c40f, #bc8cff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: legendary-shimmer 1.5s linear infinite;
+  margin-top: .5rem;
+}
+
+@keyframes legendary-shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.legendary-name {
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-top: .25rem;
+}
+
+.legendary-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #bc8cff, transparent),
+    radial-gradient(2px 2px at 40% 70%, #f1c40f, transparent),
+    radial-gradient(3px 3px at 60% 20%, #bc8cff, transparent),
+    radial-gradient(2px 2px at 80% 60%, #f1c40f, transparent),
+    radial-gradient(2px 2px at 10% 80%, #bc8cff, transparent),
+    radial-gradient(3px 3px at 90% 30%, #f1c40f, transparent),
+    radial-gradient(2px 2px at 50% 50%, #fff, transparent);
+  animation: legendary-sparkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes legendary-sparkle {
+  0%   { opacity: .4; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
 /* ── Notification types ───────────────────────────────────────── */
 
 .notif-discovery { border-color: var(--accent); }

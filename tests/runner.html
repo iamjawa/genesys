@@ -337,6 +337,29 @@ var countBefore = bulkStore.getCount();
 bulkStore.removeMultiple([]);
 is(bulkStore.getCount(), countBefore, 'empty array does nothing');
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Legendary Reveal
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('showLegendaryReveal');
+
+var revealOrg = { id:'r1', name:'Test Legendary', phenotype:{color:'Green',pattern:'Solid',shape:'Round'}, genome:{color:{allele1:'G',allele2:'G'}}, generation:3, rarityScore:5, rarityLabel:'Legendary', parents:[], discovered:0, mutations:[] };
+// Tool the reveal into the DOM
+var revealEl = document.createElement('div');
+revealEl.id = 'reveal-test-target';
+document.body.appendChild(revealEl);
+
+showLegendaryReveal(revealOrg, revealEl);
+
+// Should create an overlay with the right class
+var overlay = revealEl.querySelector('.legendary-overlay');
+assert(overlay !== null, 'legendary overlay element exists');
+
+// Should contain the organism name
+assert(overlay.textContent.indexOf('Test Legendary') !== -1, 'overlay contains organism name');
+
+// Cleanup
+revealEl.innerHTML = '';
+
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;
 document.querySelector('h1').textContent = 'GENESYS Test Runner \u2014 ' + passed + '/' + total + ' passed';

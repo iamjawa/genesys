@@ -308,8 +308,14 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
       if (offspring[m].rarityLabel === 'Rare') rares.push(offspring[m]);
       if (offspring[m].rarityLabel === 'Legendary') legs.push(offspring[m]);
     }
-    if (legs.length) showNotification('Legendary organism discovered!', 'rare');
-    else if (rares.length) showNotification('Rare organism discovered!', 'rare');
+    if (legs.length) {
+      showNotification('Legendary organism discovered!', 'rare');
+      for (var lgi = 0; lgi < legs.length; lgi++) {
+        showLegendaryReveal(legs[lgi]);
+      }
+    } else if (rares.length) {
+      showNotification('Rare organism discovered!', 'rare');
+    }
   }
 
   function showResults(offspring) {
@@ -491,6 +497,30 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
       if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
       if (e.key === 'Escape') { input.value = org.name; input.blur(); }
     });
+  }
+
+  // ── Legendary Reveal ──────────────────────────────────────────
+
+  function showLegendaryReveal(organism, container) {
+    if (!container) container = document.body;
+    var overlay = document.createElement('div');
+    overlay.className = 'legendary-overlay';
+
+    var svg = renderOrganismSVG(organism, 80);
+
+    overlay.innerHTML = '' +
+      '<div class="legendary-sparkles"></div>' +
+      '<div class="legendary-flower">' + svg + '</div>' +
+      '<div class="legendary-title">Legendary!</div>' +
+      '<div class="legendary-name">' + organism.name + '</div>';
+
+    container.appendChild(overlay);
+
+    // Auto-remove after animation
+    setTimeout(function() {
+      overlay.classList.add('legendary-fadeout');
+      setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 500);
+    }, 2800);
   }
 
   function closeModal() { dom.modal.classList.remove('visible'); }
