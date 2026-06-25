@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GENESYS — Genetics Breeder</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ─── Header ──────────────────────────────────────────────── -->
+  <header id="header">
+    <div class="logo">
+      <h1>GENESYS</h1>
+      <span class="tagline">Breed · Discover · Collect</span>
+    </div>
+    <div class="stats">
+      <span>🌿 <span id="stats-count">0</span></span>
+      <span>🧬 G<span id="stats-gen">0</span></span>
+      <span>⭐ <span id="stats-rarest">—</span></span>
+    </div>
+  </header>
+
+  <!-- ─── Main ────────────────────────────────────────────────── -->
+  <main id="main">
+
+    <!-- Breeding Station -->
+    <section id="breeding-section">
+      <h2>🧪 Breeding Station</h2>
+      <div class="breeding-panel">
+        <div class="parent-slots">
+          <div class="parent-slot">
+            <label>Parent A</label>
+            <select id="parent-a-select"></select>
+            <div id="parent-a-preview" class="parent-preview"></div>
+          </div>
+          <div class="parent-slot">
+            <label>Parent B</label>
+            <select id="parent-b-select"></select>
+            <div id="parent-b-preview" class="parent-preview"></div>
+          </div>
+        </div>
+        <button id="breed-btn" disabled>🧬 BREED</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results-section">
+      <div id="results"></div>
+    </section>
+
+    <!-- Collection -->
+    <section id="collection-section">
+      <h2>🌿 Your Collection</h2>
+      <div id="collection" class="collection-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- ─── Detail Modal ────────────────────────────────────────── -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="modal-close" class="modal-close">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ─── Notification Container ──────────────────────────────── -->
+  <div id="notification" class="notification-container"></div>
+
+  <!-- ─── Scripts ─────────────────────────────────────────────── -->
+  <script src="js/genetics.js"></script>
+  <script src="js/organisms.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
