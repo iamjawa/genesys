@@ -204,13 +204,15 @@ suite('OrganismStore.getAllSorted');
 
 localStorage.removeItem('gensys_organisms');
 var sortStore = new OrganismStore();
-sortStore.getAll()[0].name = 'Zara';
-sortStore.getAll()[1].name = 'Able';
+var sortOrgs = sortStore.getAll();
+sortOrgs[0].name = 'Zara';
+sortOrgs[1].name = 'Able';
+// Leave remaining starters with their default names
 
 var byName = sortStore.getAllSorted('name');
-is(byName.length, 2, 'returns all organisms');
+is(byName.length, 4, 'returns all 4 organisms');
 is(byName[0].name, 'Able', 'Able comes first alphabetically');
-is(byName[1].name, 'Zara', 'Zara comes second');
+is(byName[byName.length - 1].name, 'Zara', 'Zara comes last alphabetically');
 
 // Create organisms with different rarity for sorting test
 localStorage.removeItem('gensys_organisms');
@@ -247,6 +249,33 @@ lineageStore.add(baby);
 var babyLineage = lineageStore.getLineage(baby.id);
 is(babyLineage.length, 2, 'offspring lineage contains both parents');
 is(babyLineage[0].name, flora.name, 'first parent in lineage is correct');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Starter organisms
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('Starter organisms');
+
+localStorage.removeItem('gensys_organisms');
+var starterStore = new OrganismStore();
+is(starterStore.getCount(), 4, 'new store has 4 starter organisms');
+
+// Verify each starter has a valid genome
+var allStarters = starterStore.getAll();
+for (var si = 0; si < allStarters.length; si++) {
+  var s = allStarters[si];
+  assert(s.genome.color.allele1 && s.genome.color.allele2, s.name + ' has color alleles');
+  assert(s.genome.pattern.allele1 && s.genome.pattern.allele2, s.name + ' has pattern alleles');
+  assert(s.genome.shape.allele1 && s.genome.shape.allele2, s.name + ' has shape alleles');
+  assert(s.phenotype.color, s.name + ' has expressed color');
+  is(s.generation, 0, s.name + ' is generation 0');
+}
+
+// Verify starter diversity — at least 3 distinct color phenotypes among them
+var colorSet = {};
+for (var si2 = 0; si2 < allStarters.length; si2++) {
+  colorSet[allStarters[si2].phenotype.color] = true;
+}
+assert(Object.keys(colorSet).length >= 2, 'starters include at least 2 different colors');
 
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;

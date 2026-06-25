@@ -47,6 +47,18 @@ function createStarterOrganisms() {
         shape:   { allele1: 'P', allele2: 'P' } },
       [], 0, 'Alba'
     ),
+    createOrganism(
+      { color: { allele1: 'R', allele2: 'W' },
+        pattern: { allele1: 'S', allele2: 'T' },
+        shape:   { allele1: 'O', allele2: 'P' } },
+      [], 0, 'Tiger'
+    ),
+    createOrganism(
+      { color: { allele1: 'R', allele2: 'R' },
+        pattern: { allele1: 'T', allele2: 'T' },
+        shape:   { allele1: 'O', allele2: 'P' } },
+      [], 0, 'Berry'
+    ),
   ];
 }
 

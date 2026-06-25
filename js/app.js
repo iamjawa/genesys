@@ -39,6 +39,7 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsCount     = $('#stats-count');
     dom.statsGen       = $('#stats-gen');
     dom.statsRarest    = $('#stats-rarest');
+    dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
     dom.sortSelect     = $('#sort-select');
   }
@@ -402,6 +403,11 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
     dom.statsGen.textContent   = store.getMaxGeneration();
     var r = store.getRarest();
     dom.statsRarest.textContent = r ? r.rarityLabel : '\u2014';
+    if (dom.statsCompletion) {
+      var a = tracker.getAll();
+      var pct = a.total > 0 ? Math.round((a.seen / a.total) * 100) : 0;
+      dom.statsCompletion.textContent = pct + '%';
+    }
   }
 
   // ── Notifications ──────────────────────────────────────────────
