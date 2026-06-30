@@ -430,6 +430,27 @@ for (var ak = 0; ak < all.length; ak++) { if (all[ak].completed) completedCount+
 assert(completedCount < all.length, 'not all achievements completed on fresh store');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Polygenic: expressTexture
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('expressTexture');
+
+function texOrg(shape, pattern) {
+  return { genome: { color:{allele1:'R',allele2:'R'}, shape:{allele1:shape,allele2:shape}, pattern:{allele1:pattern,allele2:pattern} } };
+}
+
+is(expressTexture(texOrg('O','S')), 'Smooth', 'Round + Solid = Smooth');
+is(expressTexture(texOrg('O','T')), 'Ribbed', 'Round + Striped = Ribbed');
+is(expressTexture(texOrg('P','S')), 'Sleek', 'Pointed + Solid = Sleek');
+is(expressTexture(texOrg('P','T')), 'Spiky', 'Pointed + Striped = Spiky');
+
+// Mutation in shape or pattern → Ethereal
+var texMut = { genome: { color:{allele1:'R',allele2:'R'}, shape:{allele1:'H',allele2:'O'}, pattern:{allele1:'S',allele2:'S'} } };
+is(expressTexture(texMut), 'Ethereal', 'mutation in shape = Ethereal');
+
+var texMut2 = { genome: { color:{allele1:'R',allele2:'R'}, shape:{allele1:'O',allele2:'O'}, pattern:{allele1:'D',allele2:'S'} } };
+is(expressTexture(texMut2), 'Ethereal', 'mutation in pattern = Ethereal');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Synergy Effects
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 suite('getSynergyEffects');

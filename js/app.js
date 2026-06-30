@@ -558,6 +558,11 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
             '<span class="trait-value">' + expressScent(organism) + '</span>' +
             '<span class="trait-genotype">polygenic</span>' +
           '</div>' +
+          '<div class="trait-row">' +
+            '<span class="trait-label">Texture</span>' +
+            '<span class="trait-value">' + expressTexture(organism) + '</span>' +
+            '<span class="trait-genotype">polygenic</span>' +
+          '</div>' +
           '</div>' +
           '<div class="detail-actions">' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="a">Set as Parent A</button>' +

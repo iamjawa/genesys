@@ -187,6 +187,29 @@ function expressScent(organism) {
   return 'Earthy';
 }
 
+function expressTexture(organism) {
+  var genome = organism.genome;
+  var shapeTrait = expressGene('shape', genome.shape.allele1, genome.shape.allele2).trait;
+  var patternTrait = expressGene('pattern', genome.pattern.allele1, genome.pattern.allele2).trait;
+
+  var allShape = getAllAllelesForGene('shape');
+  var allPattern = getAllAllelesForGene('pattern');
+
+  if ((allShape[genome.shape.allele1] && allShape[genome.shape.allele1].isMutation) ||
+      (allShape[genome.shape.allele2] && allShape[genome.shape.allele2].isMutation) ||
+      (allPattern[genome.pattern.allele1] && allPattern[genome.pattern.allele1].isMutation) ||
+      (allPattern[genome.pattern.allele2] && allPattern[genome.pattern.allele2].isMutation)) {
+    return 'Ethereal';
+  }
+
+  if (shapeTrait === 'Round' && patternTrait === 'Solid') return 'Smooth';
+  if (shapeTrait === 'Round' && patternTrait === 'Striped') return 'Ribbed';
+  if (shapeTrait === 'Pointed' && patternTrait === 'Solid') return 'Sleek';
+  if (shapeTrait === 'Pointed' && patternTrait === 'Striped') return 'Spiky';
+
+  return 'Smooth';
+}
+
 function getSynergyEffects(parentA, parentB) {
   var effects = [];
 
