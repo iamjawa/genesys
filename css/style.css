@@ -121,6 +121,21 @@ section h2 {
 .sort-select:focus { border-color: var(--accent); }
 .sort-select option { background: #161b22; color: var(--text); }
 
+.filter-input {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: .35rem .6rem;
+  font-size: .78rem;
+  font-family: var(--font);
+  outline: none;
+  width: 90px;
+  transition: border var(--transition);
+}
+.filter-input:focus { border-color: var(--accent); }
+.filter-input::placeholder { color: var(--text-dim); }
+
 /* ── Breeding Station ───────────────────────────────────────────── */
 
 .breeding-panel {

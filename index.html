@@ -71,6 +71,14 @@
       <div class="section-header">
         <h2>🌿 Your Collection</h2>
         <div class="header-actions">
+          <input type="text" id="filter-search" class="filter-input" placeholder="Search..." maxlength="20">
+          <select id="filter-rarity" class="sort-select">
+            <option value="">All rarity</option>
+            <option value="Common">Common</option>
+            <option value="Uncommon">Uncommon</option>
+            <option value="Rare">Rare</option>
+            <option value="Legendary">Legendary</option>
+          </select>
           <button id="select-toggle" class="btn btn-sm">Select</button>
           <select id="sort-select" class="sort-select">
             <option value="discovered">Newest</option>

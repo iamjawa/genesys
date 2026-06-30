@@ -55,6 +55,8 @@ var _marketAdopted = false;
     dom.historyBody    = $('#history-body');
     dom.clearHistoryBtn = $('#clear-history-btn');
     dom.sortSelect     = $('#sort-select');
+    dom.filterSearch   = $('#filter-search');
+    dom.filterRarity   = $('#filter-rarity');
     dom.oddsPanel      = $('#odds-panel');
     dom.selectToggle   = $('#select-toggle');
     dom.bulkBar        = $('#bulk-bar');
@@ -78,6 +80,8 @@ var _marketAdopted = false;
       dom.offspringLabel.textContent = dom.offspringSlider.value;
     });
     if (dom.sortSelect) dom.sortSelect.addEventListener('change', renderCollection);
+    if (dom.filterSearch) dom.filterSearch.addEventListener('input', renderCollection);
+    if (dom.filterRarity) dom.filterRarity.addEventListener('change', renderCollection);
     if (dom.selectToggle) dom.selectToggle.addEventListener('click', toggleSelectMode);
     if (dom.bulkDelete) dom.bulkDelete.addEventListener('click', bulkDeleteSelected);
     if (dom.bulkCancel) dom.bulkCancel.addEventListener('click', exitSelectMode);
@@ -238,8 +242,20 @@ var _marketAdopted = false;
       all = sortBy === 'discovered' ? store.getAll() : store.getAllSorted(sortBy);
     }
     if (sortBy === 'discovered') all = all.reverse();
+
+    // Apply filters
+    var searchQ = dom.filterSearch ? dom.filterSearch.value.trim().toLowerCase() : '';
+    var rarityF = dom.filterRarity ? dom.filterRarity.value : '';
+    if (searchQ || rarityF) {
+      all = all.filter(function(o) {
+        if (searchQ && o.name.toLowerCase().indexOf(searchQ) === -1) return false;
+        if (rarityF && o.rarityLabel !== rarityF) return false;
+        return true;
+      });
+    }
+
     if (!all.length) {
-      dom.collection.innerHTML = '<div class="empty-state">No organisms yet. Start breeding!</div>';
+      dom.collection.innerHTML = '<div class="empty-state">No organisms match your filters.</div>';
       return;
     }
     var frag = document.createDocumentFragment();
