@@ -187,6 +187,22 @@ function expressScent(organism) {
   return 'Earthy';
 }
 
+function getSynergyEffects(parentA, parentB) {
+  var effects = [];
+
+  // Primal: both parents are generation 0 → +1 rarity score on offspring
+  if (parentA.generation === 0 && parentB.generation === 0) {
+    effects.push({ id: 'primal', name: 'Primal', desc: 'Both wild organisms — +1 rarity score' });
+  }
+
+  // Rainbow: parents have different expressed colors → offspring color mutation
+  if (parentA.phenotype.color !== parentB.phenotype.color) {
+    effects.push({ id: 'rainbow', name: 'Rainbow', desc: 'Different colors — offspring color may mutate' });
+  }
+
+  return effects;
+}
+
 function computeBreedingOdds(parentA, parentB) {
   var result = {};
   var geneTypes = ['color', 'pattern', 'shape'];

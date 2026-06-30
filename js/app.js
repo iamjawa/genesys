@@ -330,6 +330,20 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
       html += '</div>';
     }
     html += '</div>';
+
+    // Synergy effects
+    var effects = getSynergyEffects(pA, pB);
+    if (effects.length) {
+      html += '<div class="odds-title" style="margin-top:.75rem">Synergy effects</div><div class="synergy-grid">';
+      for (var ei = 0; ei < effects.length; ei++) {
+        html += '<div class="synergy-entry">' +
+          '<span class="synergy-name">' + effects[ei].name + '</span>' +
+          '<span class="synergy-desc">' + effects[ei].desc + '</span>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
     dom.oddsPanel.innerHTML = html;
   }
 
@@ -340,6 +354,14 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     var pB = store.getById(dom.parentBSelect.value);
     if (!pA || !pB) return;
 
+    var effects = getSynergyEffects(pA, pB);
+    var hasPrimal = false;
+    var hasRainbow = false;
+    for (var ei = 0; ei < effects.length; ei++) {
+      if (effects[ei].id === 'primal') hasPrimal = true;
+      if (effects[ei].id === 'rainbow') hasRainbow = true;
+    }
+
     var count = dom.offspringSlider ? parseInt(dom.offspringSlider.value, 10) : (1 + Math.floor(Math.random() * 3));
     var offspring = [];
     var newMutationCount = 0;
@@ -347,7 +369,29 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
 
     for (var i = 0; i < count; i++) {
       var result = breed(pA, pB);
+
+      // Rainbow: force color mutation
+      if (hasRainbow && !result.hasMutation) {
+        var newAllele = getRandomMutation('color');
+        if (Math.random() < 0.5) result.genome.color.allele1 = newAllele;
+        else result.genome.color.allele2 = newAllele;
+        result.mutations.push({ gene: 'color', allele: newAllele });
+        result.hasMutation = true;
+        result.phenotype.color = expressGene('color', result.genome.color.allele1, result.genome.color.allele2).trait;
+      }
+
       var gen = Math.max(pA.generation, pB.generation) + 1;
+      var org = createOrganism(result.genome, [pA.id, pB.id], gen);
+      org.mutations = result.mutations;
+      org.hasMutation = result.hasMutation;
+
+      // Primal: +1 rarity score
+      if (hasPrimal) {
+        org.rarityScore = Math.min(org.rarityScore + 1, 5);
+        org.rarityLabel = getRarityLabel(org.rarityScore);
+      }
+
+      if (result.hasMutation) newMutationCount += result.mutations.length;
       var org = createOrganism(result.genome, [pA.id, pB.id], gen);
       org.mutations = result.mutations;
       org.hasMutation = result.hasMutation;

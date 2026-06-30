@@ -430,6 +430,40 @@ for (var ak = 0; ak < all.length; ak++) { if (all[ak].completed) completedCount+
 assert(completedCount < all.length, 'not all achievements completed on fresh store');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Synergy Effects
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('getSynergyEffects');
+
+function synOrg(genome, gen) {
+  var full = { color:{allele1:genome.color.a1,allele2:genome.color.a2}, pattern:{allele1:genome.pattern.a1,allele2:genome.pattern.a2}, shape:{allele1:genome.shape.a1,allele2:genome.shape.a2} };
+  return { genome: JSON.parse(JSON.stringify(full)), phenotype:{color:expressGene('color',full.color.allele1,full.color.allele2).trait,pattern:expressGene('pattern',full.pattern.allele1,full.pattern.allele2).trait,shape:expressGene('shape',full.shape.allele1,full.shape.allele2).trait}, generation:gen||0, id:'s1', name:'Syn', parents:[], rarityScore:1, rarityLabel:'Common', discovered:Date.now(), mutations:[] };
+}
+
+// Both gen 0 → Primal
+var primalA = synOrg({color:{a1:'R',a2:'R'},pattern:{a1:'S',a2:'S'},shape:{a1:'O',a2:'O'}}, 0);
+var primalB = synOrg({color:{a1:'W',a2:'W'},pattern:{a1:'T',a2:'T'},shape:{a1:'P',a2:'P'}}, 0);
+var primalFx = getSynergyEffects(primalA, primalB);
+var hasPrimal = false;
+for (var fi=0;fi<primalFx.length;fi++) { if (primalFx[fi].id==='primal') hasPrimal=true; }
+assert(hasPrimal, 'two gen-0 parents trigger Primal effect');
+
+// Different colors → Rainbow
+var rainbowA = synOrg({color:{a1:'R',a2:'R'},pattern:{a1:'S',a2:'S'},shape:{a1:'O',a2:'O'}}, 1);
+var rainbowB = synOrg({color:{a1:'W',a2:'W'},pattern:{a1:'S',a2:'S'},shape:{a1:'O',a2:'O'}}, 1);
+var rainbowFx = getSynergyEffects(rainbowA, rainbowB);
+var hasRainbow = false;
+for (var fi2=0;fi2<rainbowFx.length;fi2++) { if (rainbowFx[fi2].id==='rainbow') hasRainbow=true; }
+assert(hasRainbow, 'different color parents trigger Rainbow effect');
+
+// Same color → no Rainbow
+var sameColorA = synOrg({color:{a1:'R',a2:'R'},pattern:{a1:'S',a2:'S'},shape:{a1:'O',a2:'O'}}, 1);
+var sameColorB = synOrg({color:{a1:'R',a2:'R'},pattern:{a1:'S',a2:'S'},shape:{a1:'O',a2:'O'}}, 1);
+var sameFx = getSynergyEffects(sameColorA, sameColorB);
+var hasRainbow2 = false;
+for (var fi3=0;fi3<sameFx.length;fi3++) { if (sameFx[fi3].id==='rainbow') hasRainbow2=true; }
+assert(!hasRainbow2, 'same color parents do NOT trigger Rainbow');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Codec: encodeOrganismCode / decodeOrganismCode
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 suite('Codec');
