@@ -23,6 +23,7 @@
 <script src="../js/genetics.js"></script>
 <script src="../js/organisms.js"></script>
 <script src="../js/discovery-tracker.js"></script>
+<script src="../js/codec.js"></script>
 <script>
 // ── Minimal assertion framework ────────────────────────────────────
 var passed = 0, failed = 0;
@@ -427,6 +428,57 @@ for (var aj = 0; aj < all.length; aj++) {
 var completedCount = 0;
 for (var ak = 0; ak < all.length; ak++) { if (all[ak].completed) completedCount++; }
 assert(completedCount < all.length, 'not all achievements completed on fresh store');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Codec: encodeOrganismCode / decodeOrganismCode
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('Codec');
+
+var codecOrg = {
+  id:'c1', name:'CodecTest',
+  phenotype:{color:'Red',pattern:'Solid',shape:'Round'},
+  genome:{color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'}},
+  generation:2, rarityScore:1, rarityLabel:'Common', parents:[], discovered:0, mutations:[]
+};
+
+var encoded = encodeOrganismCode(codecOrg);
+is(typeof encoded, 'string', 'encodeOrganismCode returns a string');
+is(encoded.length, 6, 'encoded code is 6 characters');
+is(encoded, 'RWSTOP', 'code matches expected 6-char encoding');
+
+var decoded = decodeOrganismCode('RWSTOP');
+assert(decoded !== null, 'decodeOrganismCode returns non-null for valid code');
+is(decoded.color.allele1, 'R', 'decoded color allele1');
+is(decoded.color.allele2, 'W', 'decoded color allele2');
+is(decoded.pattern.allele1, 'S', 'decoded pattern allele1');
+is(decoded.pattern.allele2, 'T', 'decoded pattern allele2');
+is(decoded.shape.allele1, 'O', 'decoded shape allele1');
+is(decoded.shape.allele2, 'P', 'decoded shape allele2');
+
+// Round-trip: encode then decode should match original genome
+var rtDecoded = decodeOrganismCode(encodeOrganismCode(codecOrg));
+assert(rtDecoded !== null, 'round-trip decode is non-null');
+is(rtDecoded.color.allele1, codecOrg.genome.color.allele1, 'round-trip color a1');
+is(rtDecoded.color.allele2, codecOrg.genome.color.allele2, 'round-trip color a2');
+is(rtDecoded.pattern.allele1, codecOrg.genome.pattern.allele1, 'round-trip pattern a1');
+is(rtDecoded.pattern.allele2, codecOrg.genome.pattern.allele2, 'round-trip pattern a2');
+is(rtDecoded.shape.allele1, codecOrg.genome.shape.allele1, 'round-trip shape a1');
+is(rtDecoded.shape.allele2, codecOrg.genome.shape.allele2, 'round-trip shape a2');
+
+// Invalid codes
+is(decodeOrganismCode(''), null, 'empty string returns null');
+is(decodeOrganismCode('SHORT'), null, 'short string returns null');
+is(decodeOrganismCode('TOOLONG!'), null, 'long string returns null');
+is(decodeOrganismCode('XXABCD'), null, 'invalid allele returns null');
+
+// Homeozygous encoding
+var homoOrg = {
+  id:'c2', name:'HomoOrg',
+  phenotype:{color:'Red',pattern:'Solid',shape:'Round'},
+  genome:{color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}},
+  generation:0, rarityScore:1, rarityLabel:'Common', parents:[], discovered:0, mutations:[]
+};
+is(encodeOrganismCode(homoOrg), 'RRSSOO', 'homozygous organism encodes to RRSSOO');
 
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;

@@ -54,6 +54,9 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.bulkCancel     = $('#bulk-cancel');
     dom.selectMode     = false;
     dom.selectedIds    = {};
+    dom.importInput    = $('#import-code-input');
+    dom.importBtn      = $('#import-code-btn');
+    dom.importStatus   = $('#import-status');
   }
 
   function bindEvents() {
@@ -66,6 +69,8 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     if (dom.selectToggle) dom.selectToggle.addEventListener('click', toggleSelectMode);
     if (dom.bulkDelete) dom.bulkDelete.addEventListener('click', bulkDeleteSelected);
     if (dom.bulkCancel) dom.bulkCancel.addEventListener('click', exitSelectMode);
+    if (dom.importBtn && dom.importInput) dom.importBtn.addEventListener('click', handleImport);
+    if (dom.importInput) dom.importInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleImport(); });
   }
 
   // ── Collection ─────────────────────────────────────────────────
@@ -409,6 +414,29 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  function handleImport() {
+    var code = dom.importInput.value.trim();
+    if (!code) return;
+    var genome = decodeOrganismCode(code);
+    if (!genome) {
+      dom.importStatus.textContent = 'Invalid code';
+      dom.importStatus.className = 'import-status error';
+      return;
+    }
+    var org = createOrganism(genome, [], 0);
+    var discovered = tracker.record(org);
+    store.add(org);
+    dom.importInput.value = '';
+    dom.importStatus.textContent = 'Imported: ' + org.name;
+    dom.importStatus.className = 'import-status ok';
+    renderCollection();
+    renderJournal();
+    renderAchievements();
+    updateBreedingUI();
+    updateStats();
+    if (discovered) showNotification('New allele discovered via import!', 'discovery');
+  }
+
   // ── Detail Modal ───────────────────────────────────────────────
 
   function showDetail(organism) {
@@ -485,7 +513,13 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
           '<div class="detail-actions">' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="a">Set as Parent A</button>' +
             '<button class="btn btn-sm set-parent" data-id="' + organism.id + '" data-slot="b">Set as Parent B</button>' +
+            '<button class="btn btn-sm" id="export-code-btn">Export Code</button>' +
             '<button class="btn btn-sm btn-delete" data-id="' + organism.id + '">Delete</button>' +
+          '</div>' +
+          '<div id="export-code-area" class="export-code-area hidden">' +
+            '<input type="text" class="export-code-input" readonly>' +
+            '<button class="btn btn-sm" id="copy-code-btn">Copy</button>' +
+            '<span class="export-copied hidden">Copied!</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -518,6 +552,28 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
           if (pOrg) showDetail(pOrg);
         });
       })(lineageEntries[li]);
+    }
+
+    var exportBtn = dom.modalBody.querySelector('#export-code-btn');
+    var exportArea = dom.modalBody.querySelector('#export-code-area');
+    var exportInput = dom.modalBody.querySelector('.export-code-input');
+    var copyBtn = dom.modalBody.querySelector('#copy-code-btn');
+    var copiedMsg = dom.modalBody.querySelector('.export-copied');
+
+    if (exportBtn && exportArea && exportInput) {
+      exportBtn.addEventListener('click', function() {
+        exportInput.value = encodeOrganismCode(organism);
+        exportArea.classList.toggle('hidden');
+      });
+    }
+
+    if (copyBtn && exportInput && copiedMsg) {
+      copyBtn.addEventListener('click', function() {
+        exportInput.select();
+        try { document.execCommand('copy'); } catch(_) {}
+        copiedMsg.classList.remove('hidden');
+        setTimeout(function() { copiedMsg.classList.add('hidden'); }, 2000);
+      });
     }
   }
 

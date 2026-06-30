@@ -938,6 +938,70 @@ section h2 {
 
 .notif-discovery { border-color: var(--accent); }
 
+/* ── Export Code ────────────────────────────────────────────────── */
+
+.export-code-area {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .5rem;
+}
+.export-code-area.hidden { display: none; }
+
+.export-code-input {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: .35rem .5rem;
+  font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+  font-size: .82rem;
+  letter-spacing: .1em;
+  text-align: center;
+  outline: none;
+}
+
+.export-copied {
+  font-size: .72rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+.export-copied.hidden { display: none; }
+
+/* ── Import Row ─────────────────────────────────────────────────── */
+
+.import-row {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .75rem;
+}
+
+.import-input {
+  flex: 1;
+  max-width: 120px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: .35rem .5rem;
+  font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+  font-size: .82rem;
+  letter-spacing: .1em;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+}
+.import-input:focus { border-color: var(--accent); }
+
+.import-status {
+  font-size: .75rem;
+  font-weight: 600;
+}
+.import-status.ok    { color: var(--accent); }
+.import-status.error { color: var(--red); }
+
 /* ── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
