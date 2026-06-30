@@ -13,6 +13,7 @@ var achievements = new AchievementTracker(store, tracker);
 var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a.id; });
 var _marketOffer = null;
 var _marketAdopted = false;
+var _gardenView = false;
 
 (function() {
   var $ = function(sel) { return document.querySelector(sel); };
@@ -57,6 +58,7 @@ var _marketAdopted = false;
     dom.sortSelect     = $('#sort-select');
     dom.filterSearch   = $('#filter-search');
     dom.filterRarity   = $('#filter-rarity');
+    dom.viewToggle     = $('#view-toggle');
     dom.oddsPanel      = $('#odds-panel');
     dom.selectToggle   = $('#select-toggle');
     dom.bulkBar        = $('#bulk-bar');
@@ -82,6 +84,7 @@ var _marketAdopted = false;
     if (dom.sortSelect) dom.sortSelect.addEventListener('change', renderCollection);
     if (dom.filterSearch) dom.filterSearch.addEventListener('input', renderCollection);
     if (dom.filterRarity) dom.filterRarity.addEventListener('change', renderCollection);
+    if (dom.viewToggle) dom.viewToggle.addEventListener('click', toggleGardenView);
     if (dom.selectToggle) dom.selectToggle.addEventListener('click', toggleSelectMode);
     if (dom.bulkDelete) dom.bulkDelete.addEventListener('click', bulkDeleteSelected);
     if (dom.bulkCancel) dom.bulkCancel.addEventListener('click', exitSelectMode);
@@ -93,6 +96,12 @@ var _marketAdopted = false;
   }
 
   // ── Collection ─────────────────────────────────────────────────
+
+  function toggleGardenView() {
+    _gardenView = !_gardenView;
+    dom.viewToggle.textContent = _gardenView ? 'Grid' : 'Garden';
+    renderCollection();
+  }
 
   function toggleSelectMode() {
     dom.selectMode = !dom.selectMode;
@@ -230,6 +239,8 @@ var _marketAdopted = false;
 
   function renderCollection() {
     dom.collection.innerHTML = '';
+    if (_gardenView) dom.collection.classList.add('garden-view');
+    else dom.collection.classList.remove('garden-view');
     var sortBy = dom.sortSelect ? dom.sortSelect.value : 'discovered';
     var all;
     if (sortBy === 'scent' || sortBy === 'texture') {

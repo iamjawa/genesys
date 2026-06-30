@@ -617,6 +617,35 @@ section h2 {
 .btn-sm:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
 .btn.disabled, .btn-sm.disabled { opacity: .4; cursor: not-allowed; }
 
+/* ── Garden View ──────────────────────────────────────────────── */
+
+.collection-grid.garden-view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  padding: 1rem 1rem 2rem;
+  background:
+    radial-gradient(ellipse 80% 20% at 50% 100%, rgba(46,160,67,.12), transparent 80%),
+    rgba(13,17,23,.6);
+  border-radius: var(--radius);
+  min-height: 200px;
+  justify-content: center;
+}
+
+.collection-grid.garden-view .organism-card {
+  transform: rotate(var(--rot, 0deg));
+  transition: transform .3s ease, box-shadow .3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.collection-grid.garden-view .organism-card:hover {
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+.collection-grid.garden-view .organism-card:nth-child(3n) { --rot: -2deg; }
+.collection-grid.garden-view .organism-card:nth-child(3n+1) { --rot: 1.5deg; }
+.collection-grid.garden-view .organism-card:nth-child(5n+2) { --rot: -1deg; }
+.collection-grid.garden-view .organism-card:nth-child(7n+4) { --rot: 2.5deg; }
+
 /* ── Select Mode ──────────────────────────────────────────────── */
 
 .header-actions { display: flex; align-items: center; gap: .5rem; }
