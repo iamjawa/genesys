@@ -46,6 +46,7 @@ var _gardenView = false;
     dom.modalBody      = $('#modal-body');
     dom.modalClose     = $('#modal-close');
     dom.notifContainer = $('#notification');
+    dom.resetBtn       = $('#reset-btn');
     dom.statsCount     = $('#stats-count');
     dom.statsGen       = $('#stats-gen');
     dom.statsRarest    = $('#stats-rarest');
@@ -93,6 +94,7 @@ var _gardenView = false;
     if (dom.clearHistoryBtn) dom.clearHistoryBtn.addEventListener('click', function() {
       if (confirm('Clear all breeding history?')) { clearBreedLog(); renderBreedLog(); }
     });
+    if (dom.resetBtn) dom.resetBtn.addEventListener('click', handleReset);
   }
 
   // ── Collection ─────────────────────────────────────────────────
@@ -607,6 +609,15 @@ var _gardenView = false;
     updateBreedingUI();
     updateStats();
     if (discovered) showNotification('New allele discovered via import!', 'discovery');
+  }
+
+  function handleReset() {
+    if (!confirm('Start over? This will delete ALL your organisms and progress permanently.')) return;
+    if (!confirm('Are you sure? This cannot be undone.')) return;
+    localStorage.removeItem('gensys_organisms');
+    localStorage.removeItem('gensys_breed_log');
+    clearBreedLog();
+    location.reload();
   }
 
   // ── Detail Modal ───────────────────────────────────────────────

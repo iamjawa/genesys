@@ -77,6 +77,15 @@ body {
 
 .stats span { white-space: nowrap; }
 
+.reset-btn {
+  background: rgba(248,81,73,.1) !important;
+  color: var(--red) !important;
+  font-size: .9rem !important;
+  line-height: 1;
+  padding: .2rem .4rem !important;
+}
+.reset-btn:hover { background: rgba(248,81,73,.25) !important; }
+
 /* ── Main Layout ────────────────────────────────────────────────── */
 
 #main {
