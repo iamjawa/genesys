@@ -1033,6 +1033,48 @@ section h2 {
   color: var(--text-dim);
 }
 
+/* ── Breeding History ──────────────────────────────────────────── */
+
+.history-body { max-height: 300px; overflow-y: auto; }
+
+.history-list { display: flex; flex-direction: column; gap: .35rem; }
+
+.history-entry {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .3rem .5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.02);
+  font-size: .78rem;
+  flex-wrap: wrap;
+}
+
+.history-time {
+  color: var(--text-dim);
+  font-size: .7rem;
+  font-family: monospace;
+  min-width: 5em;
+}
+
+.history-parents {
+  color: var(--text);
+  font-weight: 600;
+  flex: 1;
+  min-width: 80px;
+}
+
+.history-count {
+  color: var(--text-dim);
+  font-size: .72rem;
+}
+
+.history-effects {
+  color: #58a6ff;
+  font-size: .7rem;
+  font-weight: 600;
+}
+
 /* ── Offspring Count Slider ─────────────────────────────────────── */
 
 .breeding-controls {

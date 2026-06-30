@@ -180,3 +180,32 @@ OrganismStore.prototype.getRarest = function() {
   }
   return best;
 };
+
+// ── Breed Log ──────────────────────────────────────────────────────
+
+var BREED_LOG_KEY = 'gensys_breed_log';
+
+function getBreedLog() {
+  try {
+    var raw = localStorage.getItem(BREED_LOG_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(_) { return []; }
+}
+
+function recordBreed(parentA, parentB, offspringCount, effectNames) {
+  var log = getBreedLog();
+  log.push({
+    id: 'bl_' + Date.now().toString(36),
+    timestamp: Date.now(),
+    parentA: { id: parentA.id, name: parentA.name },
+    parentB: { id: parentB.id, name: parentB.name },
+    offspringCount: offspringCount,
+    effects: effectNames || [],
+  });
+  if (log.length > 100) log = log.slice(-100);
+  try { localStorage.setItem(BREED_LOG_KEY, JSON.stringify(log)); } catch(_) {}
+}
+
+function clearBreedLog() {
+  try { localStorage.removeItem(BREED_LOG_KEY); } catch(_) {}
+}

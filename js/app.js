@@ -21,9 +21,10 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     renderCollection();
     renderJournal();
     renderAchievements();
+    renderBreedLog();
     updateBreedingUI();
-    bindEvents();
     updateStats();
+    renderBreedLog();
     showNotification('Welcome to GENESYS! Breed your first two plants.', 'info');
   }
 
@@ -47,6 +48,8 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
     dom.achievementsBody = $('#achievements-body');
+    dom.historyBody    = $('#history-body');
+    dom.clearHistoryBtn = $('#clear-history-btn');
     dom.sortSelect     = $('#sort-select');
     dom.oddsPanel      = $('#odds-panel');
     dom.selectToggle   = $('#select-toggle');
@@ -76,6 +79,9 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     if (dom.bulkCancel) dom.bulkCancel.addEventListener('click', exitSelectMode);
     if (dom.importBtn && dom.importInput) dom.importBtn.addEventListener('click', handleImport);
     if (dom.importInput) dom.importInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleImport(); });
+    if (dom.clearHistoryBtn) dom.clearHistoryBtn.addEventListener('click', function() {
+      if (confirm('Clear all breeding history?')) { clearBreedLog(); renderBreedLog(); }
+    });
   }
 
   // ── Collection ─────────────────────────────────────────────────
@@ -143,6 +149,31 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
         '</div>';
     }
     dom.achievementsBody.innerHTML = html;
+  }
+
+  function renderBreedLog() {
+    if (!dom.historyBody) return;
+    var log = getBreedLog();
+    if (!log.length) {
+      dom.historyBody.innerHTML = '<div class="empty-state">No breeding history yet.</div>';
+      return;
+    }
+    var html = '<div class="history-list">';
+    for (var hi = log.length - 1; hi >= 0; hi--) {
+      var entry = log[hi];
+      var date = new Date(entry.timestamp);
+      var timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+      html += '<div class="history-entry">' +
+        '<span class="history-time">' + timeStr + '</span>' +
+        '<span class="history-parents">' + entry.parentA.name + ' × ' + entry.parentB.name + '</span>' +
+        '<span class="history-count">' + entry.offspringCount + ' offspring</span>';
+      if (entry.effects && entry.effects.length) {
+        html += '<span class="history-effects">' + entry.effects.join(', ') + '</span>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    dom.historyBody.innerHTML = html;
   }
 
   function renderCollection() {
@@ -402,6 +433,10 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     }
 
     for (var k = 0; k < offspring.length; k++) store.add(offspring[k]);
+
+    var effectNames = [];
+    for (var effi = 0; effi < effects.length; effi++) effectNames.push(effects[effi].name);
+    recordBreed(pA, pB, offspring.length, effectNames);
 
     showResults(offspring);
     renderCollection();
