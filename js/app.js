@@ -34,6 +34,8 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.parentAPreview = $('#parent-a-preview');
     dom.parentBPreview = $('#parent-b-preview');
     dom.breedBtn       = $('#breed-btn');
+    dom.offspringSlider = $('#offspring-slider');
+    dom.offspringLabel  = $('#offspring-count-label');
     dom.results        = $('#results');
     dom.modal          = $('#modal');
     dom.modalBody      = $('#modal-body');
@@ -65,6 +67,9 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.modal.addEventListener('click', function(e) { if (e.target === dom.modal) closeModal(); });
     dom.parentASelect.addEventListener('change', updateBreedingUI);
     dom.parentBSelect.addEventListener('change', updateBreedingUI);
+    if (dom.offspringSlider) dom.offspringSlider.addEventListener('input', function() {
+      dom.offspringLabel.textContent = dom.offspringSlider.value;
+    });
     if (dom.sortSelect) dom.sortSelect.addEventListener('change', renderCollection);
     if (dom.selectToggle) dom.selectToggle.addEventListener('click', toggleSelectMode);
     if (dom.bulkDelete) dom.bulkDelete.addEventListener('click', bulkDeleteSelected);
@@ -335,7 +340,7 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     var pB = store.getById(dom.parentBSelect.value);
     if (!pA || !pB) return;
 
-    var count = 1 + Math.floor(Math.random() * 3);
+    var count = dom.offspringSlider ? parseInt(dom.offspringSlider.value, 10) : (1 + Math.floor(Math.random() * 3));
     var offspring = [];
     var newMutationCount = 0;
     var newDiscoveries = false;
