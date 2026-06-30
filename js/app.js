@@ -11,6 +11,8 @@ for (var oi = 0; oi < allOrgs.length; oi++) {
 }
 var achievements = new AchievementTracker(store, tracker);
 var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a.id; });
+var _marketOffer = null;
+var _marketAdopted = false;
 
 (function() {
   var $ = function(sel) { return document.querySelector(sel); };
@@ -22,6 +24,7 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     renderJournal();
     renderAchievements();
     renderBreedLog();
+    generateMarketOffer();
     updateBreedingUI();
     updateStats();
     renderBreedLog();
@@ -48,6 +51,7 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     dom.statsCompletion = $('#stats-completion');
     dom.journalBody    = $('#journal-body');
     dom.achievementsBody = $('#achievements-body');
+    dom.marketBody    = $('#market-body');
     dom.historyBody    = $('#history-body');
     dom.clearHistoryBtn = $('#clear-history-btn');
     dom.sortSelect     = $('#sort-select');
@@ -131,6 +135,50 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     if (count === 0 && !dom.bulkBar.classList.contains('hidden')) {
       // keep visible so Cancel button is reachable
     }
+  }
+
+  function generateMarketOffer() {
+    var genome = generateRandomGenome();
+    _marketOffer = createOrganism(genome, [], 0);
+    _marketAdopted = false;
+    renderMarket();
+  }
+
+  function renderMarket() {
+    if (!dom.marketBody) return;
+    if (!_marketOffer) {
+      dom.marketBody.innerHTML = '<div class="empty-state">Breed to generate a new offering.</div>';
+      return;
+    }
+    var card = createOrganismCard(_marketOffer, 80);
+    var adoptRow = document.createElement('div');
+    adoptRow.className = 'market-actions';
+    var adoptBtn = document.createElement('button');
+    adoptBtn.className = 'btn btn-sm' + (_marketAdopted ? ' disabled' : '');
+    adoptBtn.textContent = _marketAdopted ? 'Adopted ✓' : 'Adopt';
+    adoptBtn.disabled = _marketAdopted;
+    if (!_marketAdopted) {
+      adoptBtn.addEventListener('click', function() {
+        tracker.record(_marketOffer);
+        store.add(_marketOffer);
+        _marketAdopted = true;
+        renderMarket();
+        renderCollection();
+        renderJournal();
+        updateBreedingUI();
+        updateStats();
+        showNotification('Adopted: ' + _marketOffer.name, 'info');
+      });
+    }
+    adoptRow.appendChild(adoptBtn);
+    var codeStr = encodeOrganismCode(_marketOffer);
+    var codeEl = document.createElement('span');
+    codeEl.className = 'market-code';
+    codeEl.textContent = codeStr;
+    adoptRow.appendChild(codeEl);
+    dom.marketBody.innerHTML = '';
+    dom.marketBody.appendChild(card);
+    dom.marketBody.appendChild(adoptRow);
   }
 
   function renderAchievements() {
@@ -437,6 +485,7 @@ var _prevAchievementIds = achievements.getCompleted().map(function(a) { return a
     var effectNames = [];
     for (var effi = 0; effi < effects.length; effi++) effectNames.push(effects[effi].name);
     recordBreed(pA, pB, offspring.length, effectNames);
+    generateMarketOffer();
 
     showResults(offspring);
     renderCollection();

@@ -210,6 +210,19 @@ function expressTexture(organism) {
   return 'Smooth';
 }
 
+function generateRandomGenome() {
+  var geneTypes = ['color', 'pattern', 'shape'];
+  var genome = {};
+  for (var g = 0; g < geneTypes.length; g++) {
+    var all = getAllAllelesForGene(geneTypes[g]);
+    var codes = Object.keys(all);
+    var a1 = codes[Math.floor(Math.random() * codes.length)];
+    var a2 = codes[Math.floor(Math.random() * codes.length)];
+    genome[geneTypes[g]] = { allele1: a1, allele2: a2 };
+  }
+  return genome;
+}
+
 function getSynergyEffects(parentA, parentB) {
   var effects = [];
 

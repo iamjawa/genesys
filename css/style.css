@@ -598,6 +598,7 @@ section h2 {
   color: var(--text);
 }
 .btn-sm:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+.btn.disabled, .btn-sm.disabled { opacity: .4; cursor: not-allowed; }
 
 /* ── Select Mode ──────────────────────────────────────────────── */
 
@@ -1031,6 +1032,31 @@ section h2 {
 
 .synergy-desc {
   color: var(--text-dim);
+}
+
+/* ── Seed Exchange ──────────────────────────────────────────────── */
+
+.market-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.market-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.market-code {
+  font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+  font-size: .82rem;
+  letter-spacing: .12em;
+  color: var(--text-dim);
+  background: rgba(255,255,255,.04);
+  padding: .2rem .5rem;
+  border-radius: 4px;
 }
 
 /* ── Breeding History ──────────────────────────────────────────── */
