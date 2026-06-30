@@ -250,6 +250,51 @@ function getSynergyEffects(parentA, parentB) {
   return effects;
 }
 
+var BREEDING_RECIPES = [
+  {
+    id: 'sunset_cross',
+    name: 'Sunset Cross',
+    check: function(a, b) {
+      return (a.name === 'Rose' && b.name === 'Lily') || (a.name === 'Lily' && b.name === 'Rose');
+    },
+  },
+  {
+    id: 'meadow_blend',
+    name: 'Meadow Blend',
+    check: function(a, b) {
+      return (a.name === 'Tulip' && b.name === 'Daisy') || (a.name === 'Daisy' && b.name === 'Tulip');
+    },
+  },
+  {
+    id: 'pure_strain',
+    name: 'Pure Strain',
+    check: function(a, b) {
+      return a.phenotype.color === b.phenotype.color && a.phenotype.pattern === b.phenotype.pattern && a.phenotype.shape === b.phenotype.shape && a.phenotype.size === b.phenotype.size;
+    },
+  },
+  {
+    id: 'mutant_cross',
+    name: 'Mutant Cross',
+    check: function(a, b) {
+      return a.rarityLabel === 'Rare' && b.rarityLabel === 'Rare';
+    },
+  },
+  {
+    id: 'legendary_union',
+    name: 'Legendary Union',
+    check: function(a, b) {
+      return a.rarityLabel === 'Legendary' && b.rarityLabel === 'Legendary';
+    },
+  },
+];
+
+function getBreedingRecipe(parentA, parentB) {
+  for (var ri = 0; ri < BREEDING_RECIPES.length; ri++) {
+    if (BREEDING_RECIPES[ri].check(parentA, parentB)) return BREEDING_RECIPES[ri];
+  }
+  return null;
+}
+
 function computeBreedingOdds(parentA, parentB) {
   var result = {};
   var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape', size: 'Size' };

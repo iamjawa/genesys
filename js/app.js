@@ -439,6 +439,7 @@ var _marketAdopted = false;
       if (effects[ei].id === 'primal') hasPrimal = true;
       if (effects[ei].id === 'rainbow') hasRainbow = true;
     }
+    var recipe = getBreedingRecipe(pA, pB);
 
     var count = dom.offspringSlider ? parseInt(dom.offspringSlider.value, 10) : (1 + Math.floor(Math.random() * 3));
     var offspring = [];
@@ -460,6 +461,7 @@ var _marketAdopted = false;
 
       var gen = Math.max(pA.generation, pB.generation) + 1;
       var org = createOrganism(result.genome, [pA.id, pB.id], gen);
+      if (recipe) org.name = recipe.name + ' ' + org.name;
       org.mutations = result.mutations;
       org.hasMutation = result.hasMutation;
 
@@ -483,7 +485,9 @@ var _marketAdopted = false;
 
     var effectNames = [];
     for (var effi = 0; effi < effects.length; effi++) effectNames.push(effects[effi].name);
+    if (recipe) effectNames.push(recipe.name);
     recordBreed(pA, pB, offspring.length, effectNames);
+    if (recipe) showNotification('Recipe: ' + recipe.name + '!', 'rare');
     generateMarketOffer();
 
     showResults(offspring);

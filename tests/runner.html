@@ -453,6 +453,35 @@ var texMut2 = { genome: { color:{allele1:'R',allele2:'R'}, shape:{allele1:'O',al
 is(expressTexture(texMut2), 'Ethereal', 'mutation in pattern = Ethereal');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Breeding Recipes
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suite('getBreedingRecipe');
+
+function recipeOrg(name, pheno, rarity) {
+  return { name: name, phenotype: pheno, rarityLabel: rarity || 'Common', genome:{} };
+}
+
+var rose = recipeOrg('Rose', {color:'Red',pattern:'Solid',shape:'Round',size:'Tall'});
+var lily = recipeOrg('Lily', {color:'White',pattern:'Striped',shape:'Pointed',size:'Bushy'});
+var tulip = recipeOrg('Tulip', {color:'Red',pattern:'Striped',shape:'Round',size:'Bushy'});
+var daisy = recipeOrg('Daisy', {color:'White',pattern:'Solid',shape:'Pointed',size:'Tall'});
+
+is(getBreedingRecipe(rose, lily).id, 'sunset_cross', 'Rose x Lily = Sunset Cross');
+is(getBreedingRecipe(lily, rose).id, 'sunset_cross', 'Lily x Rose = Sunset Cross (reversed)');
+is(getBreedingRecipe(tulip, daisy).id, 'meadow_blend', 'Tulip x Daisy = Meadow Blend');
+is(getBreedingRecipe(daisy, tulip).id, 'meadow_blend', 'Daisy x Tulip = Meadow Blend (reversed)');
+
+// Pure Strain: same phenotype
+var cloneA = recipeOrg('Any', {color:'Red',pattern:'Solid',shape:'Round',size:'Tall'});
+var cloneB = recipeOrg('Any2', {color:'Red',pattern:'Solid',shape:'Round',size:'Tall'});
+is(getBreedingRecipe(cloneA, cloneB).id, 'pure_strain', 'same phenotype = Pure Strain');
+
+// No recipe for unrelated pair
+var weirdA = recipeOrg('X', {color:'Green',pattern:'Dotted',shape:'Heart',size:'Dwarf'});
+var weirdB = recipeOrg('Y', {color:'Blue',pattern:'Spotted',shape:'Star',size:'Wide'});
+is(getBreedingRecipe(weirdA, weirdB), null, 'unrelated pair has no recipe');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Synergy Effects
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 suite('getSynergyEffects');
