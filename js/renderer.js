@@ -193,12 +193,16 @@ function createOrganismCard(organism, size) {
   var scentEmoji = { Sweet:'🌸', Spicy:'🌶', Fresh:'🌿', Earthy:'🌱', Exotic:'✨' };
   var emoji = scentEmoji[scent] || '🌸';
 
+  var sizeEmoji = { Tall: '\u2191', Bushy: '\u2194', Dwarf: '\u2193', Wide: '\u2195' };
+  var sEmoji = sizeEmoji[organism.phenotype.size] || '';
+
   card.innerHTML = '' +
     '<div class="card-svg">' + svg + '</div>' +
     '<div class="card-name">' + organism.name + '</div>' +
     '<div class="card-traits">' +
       '<span class="trait-dot" style="background:' + hex + '"></span>' +
       '<span class="trait-label">' + organism.phenotype.color + '</span>' +
+      '<span class="trait-size">' + sEmoji + '</span>' +
       '<span class="trait-scent" title="' + scent + '">' + emoji + '</span>' +
     '</div>' +
     '<div class="card-gen">G' + organism.generation + '</div>' +

@@ -3,8 +3,6 @@
  * Tracks which alleles the player has discovered.
  */
 
-var GENE_TYPES = ['color', 'pattern', 'shape'];
-
 function DiscoveryTracker() {
   this.alleles = {};
   for (var i = 0; i < GENE_TYPES.length; i++) {

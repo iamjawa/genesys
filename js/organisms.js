@@ -13,17 +13,17 @@ function createOrganism(genome, parentIds, generation, name) {
   if (!parentIds) parentIds = [];
   if (generation === undefined) generation = 0;
 
-  var phenotype = {
-    color:  expressGene('color',   genome.color.allele1,   genome.color.allele2).trait,
-    pattern: expressGene('pattern', genome.pattern.allele1, genome.pattern.allele2).trait,
-    shape:  expressGene('shape',   genome.shape.allele1,   genome.shape.allele2).trait,
-  };
+  var phenotype = {};
+  for (var pi = 0; pi < GENE_TYPES.length; pi++) {
+    var pg = GENE_TYPES[pi];
+    if (genome[pg]) phenotype[pg] = expressGene(pg, genome[pg].allele1, genome[pg].allele2).trait;
+  }
   var rarityScore = calculateRarity(genome);
   return {
     id: generateId(),
     name: name || phenotype.color + ' ' + phenotype.shape + ' #' + _idCounter,
     genome: JSON.parse(JSON.stringify(genome)),
-    phenotype: { color: phenotype.color, pattern: phenotype.pattern, shape: phenotype.shape },
+    phenotype: { color: phenotype.color, pattern: phenotype.pattern, shape: phenotype.shape, size: phenotype.size },
     parents: parentIds.slice(),
     generation: generation,
     rarityScore: rarityScore,
@@ -38,25 +38,29 @@ function createStarterOrganisms() {
     createOrganism(
       { color: { allele1: 'R', allele2: 'R' },
         pattern: { allele1: 'S', allele2: 'S' },
-        shape:   { allele1: 'O', allele2: 'O' } },
+        shape:   { allele1: 'O', allele2: 'O' },
+        size:    { allele1: 'T', allele2: 'T' } },
       [], 0, 'Rose'
     ),
     createOrganism(
       { color: { allele1: 'W', allele2: 'W' },
         pattern: { allele1: 'T', allele2: 'T' },
-        shape:   { allele1: 'P', allele2: 'P' } },
+        shape:   { allele1: 'P', allele2: 'P' },
+        size:    { allele1: 'B', allele2: 'B' } },
       [], 0, 'Lily'
     ),
     createOrganism(
       { color: { allele1: 'R', allele2: 'R' },
         pattern: { allele1: 'T', allele2: 'T' },
-        shape:   { allele1: 'O', allele2: 'O' } },
+        shape:   { allele1: 'O', allele2: 'O' },
+        size:    { allele1: 'T', allele2: 'B' } },
       [], 0, 'Tulip'
     ),
     createOrganism(
       { color: { allele1: 'W', allele2: 'W' },
         pattern: { allele1: 'S', allele2: 'S' },
-        shape:   { allele1: 'P', allele2: 'P' } },
+        shape:   { allele1: 'P', allele2: 'P' },
+        size:    { allele1: 'T', allele2: 'T' } },
       [], 0, 'Daisy'
     ),
   ];

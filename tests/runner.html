@@ -103,8 +103,8 @@ is(getRarityLabel(5), 'Legendary', 'label for 5');
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 suite('breed');
 
-function makeParent(c1,c2,p1,p2,s1,s2) {
-  return { genome: { color:{allele1:c1,allele2:c2}, pattern:{allele1:p1,allele2:p2}, shape:{allele1:s1,allele2:s2} } };
+function makeParent(c1,c2,p1,p2,s1,s2,z1,z2) {
+  return { genome: { color:{allele1:c1,allele2:c2}, pattern:{allele1:p1,allele2:p2}, shape:{allele1:s1,allele2:s2}, size:{allele1:z1||'T',allele2:z2||'T'} } };
 }
 
 var r = breed(makeParent('R','R','S','S','O','O'), makeParent('W','W','T','T','P','P'));
@@ -144,7 +144,7 @@ is(a1.seen, 0, 'seen = 0 when empty');
 
 // Record organism
 var t2 = new DiscoveryTracker();
-t2.record(mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'} }));
+t2.record(mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'}, size:{allele1:'T',allele2:'B'} }));
 var d2 = t2.getDiscovered();
 assert(d2.color.hasOwnProperty('R'), 'color R discovered');
 assert(d2.pattern.hasOwnProperty('S'), 'pattern S discovered');
@@ -154,7 +154,7 @@ assert(d2.shape.hasOwnProperty('P'), 'shape P discovered');
 
 // Record returns true/false
 var t3 = new DiscoveryTracker();
-var org3 = mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} });
+var org3 = mockOrg({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'T'} });
 assert(t3.record(org3) === true, 'first record returns true');
 assert(t3.record(org3) === false, 'duplicate record returns false');
 
@@ -267,7 +267,9 @@ for (var si = 0; si < allStarters.length; si++) {
   assert(s.genome.color.allele1 && s.genome.color.allele2, s.name + ' has color alleles');
   assert(s.genome.pattern.allele1 && s.genome.pattern.allele2, s.name + ' has pattern alleles');
   assert(s.genome.shape.allele1 && s.genome.shape.allele2, s.name + ' has shape alleles');
+  assert(s.genome.size.allele1 && s.genome.size.allele2, s.name + ' has size alleles');
   assert(s.phenotype.color, s.name + ' has expressed color');
+  assert(s.phenotype.size, s.name + ' has expressed size');
   is(s.generation, 0, s.name + ' is generation 0');
 }
 
@@ -372,16 +374,16 @@ function oddsParent(genome) {
 
 // RR × WW → 100% Red
 var odds1 = computeBreedingOdds(
-  oddsParent({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} }),
-  oddsParent({ color:{allele1:'W',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} })
+  oddsParent({ color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'T'} }),
+  oddsParent({ color:{allele1:'W',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'T'} })
 );
 is(Math.abs(odds1.color.Red - 1) < 0.001, true, 'RR×WW → 100% Red');
 is(Math.abs(odds1.color.White - 0) < 0.001, true, 'RR×WW → 0% White');
 
 // RW × RW → 75% Red, 25% White
 var odds2 = computeBreedingOdds(
-  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{alle1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} }),
-  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'} })
+  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'B'} }),
+  oddsParent({ color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'B'} })
 );
 is(Math.abs(odds2.color.Red - 0.75) < 0.001, true, 'RW×RW → 75% Red');
 is(Math.abs(odds2.color.White - 0.25) < 0.001, true, 'RW×RW → 25% White');
@@ -492,23 +494,38 @@ suite('Codec');
 var codecOrg = {
   id:'c1', name:'CodecTest',
   phenotype:{color:'Red',pattern:'Solid',shape:'Round'},
-  genome:{color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'}},
+  genome:{color:{allele1:'R',allele2:'W'}, pattern:{allele1:'S',allele2:'T'}, shape:{allele1:'O',allele2:'P'}, size:{allele1:'T',allele2:'B'}},
   generation:2, rarityScore:1, rarityLabel:'Common', parents:[], discovered:0, mutations:[]
 };
 
 var encoded = encodeOrganismCode(codecOrg);
 is(typeof encoded, 'string', 'encodeOrganismCode returns a string');
-is(encoded.length, 6, 'encoded code is 6 characters');
-is(encoded, 'RWSTOP', 'code matches expected 6-char encoding');
+is(encoded.length, 8, 'encoded code is 8 characters');
+is(encoded, 'RWSTOPTB', 'code matches expected 8-char encoding');
 
-var decoded = decodeOrganismCode('RWSTOP');
-assert(decoded !== null, 'decodeOrganismCode returns non-null for valid code');
-is(decoded.color.allele1, 'R', 'decoded color allele1');
-is(decoded.color.allele2, 'W', 'decoded color allele2');
-is(decoded.pattern.allele1, 'S', 'decoded pattern allele1');
-is(decoded.pattern.allele2, 'T', 'decoded pattern allele2');
-is(decoded.shape.allele1, 'O', 'decoded shape allele1');
-is(decoded.shape.allele2, 'P', 'decoded shape allele2');
+// 6-char backward compat
+var decoded6 = decodeOrganismCode('RWSTOP');
+assert(decoded6 !== null, 'decodeOrganismCode accepts 6-char code');
+is(decoded6.color.allele1, 'R', 'decoded color allele1');
+is(decoded6.color.allele2, 'W', 'decoded color allele2');
+is(decoded6.pattern.allele1, 'S', 'decoded pattern allele1');
+is(decoded6.pattern.allele2, 'T', 'decoded pattern allele2');
+is(decoded6.shape.allele1, 'O', 'decoded shape allele1');
+is(decoded6.shape.allele2, 'P', 'decoded shape allele2');
+is(decoded6.size.allele1, 'T', '6-char code defaults size to T');
+is(decoded6.size.allele2, 'T', '6-char code defaults size to T');
+
+// 8-char decode
+var decoded8 = decodeOrganismCode('RWSTOPTB');
+assert(decoded8 !== null, 'decodeOrganismCode accepts 8-char code');
+is(decoded8.color.allele1, 'R', '8-char decoded color a1');
+is(decoded8.color.allele2, 'W', '8-char decoded color a2');
+is(decoded8.pattern.allele1, 'S', '8-char decoded pattern a1');
+is(decoded8.pattern.allele2, 'T', '8-char decoded pattern a2');
+is(decoded8.shape.allele1, 'O', '8-char decoded shape a1');
+is(decoded8.shape.allele2, 'P', '8-char decoded shape a2');
+is(decoded8.size.allele1, 'T', '8-char decoded size a1');
+is(decoded8.size.allele2, 'B', '8-char decoded size a2');
 
 // Round-trip: encode then decode should match original genome
 var rtDecoded = decodeOrganismCode(encodeOrganismCode(codecOrg));
@@ -519,21 +536,23 @@ is(rtDecoded.pattern.allele1, codecOrg.genome.pattern.allele1, 'round-trip patte
 is(rtDecoded.pattern.allele2, codecOrg.genome.pattern.allele2, 'round-trip pattern a2');
 is(rtDecoded.shape.allele1, codecOrg.genome.shape.allele1, 'round-trip shape a1');
 is(rtDecoded.shape.allele2, codecOrg.genome.shape.allele2, 'round-trip shape a2');
+is(rtDecoded.size.allele1, codecOrg.genome.size.allele1, 'round-trip size a1');
+is(rtDecoded.size.allele2, codecOrg.genome.size.allele2, 'round-trip size a2');
 
 // Invalid codes
 is(decodeOrganismCode(''), null, 'empty string returns null');
-is(decodeOrganismCode('SHORT'), null, 'short string returns null');
-is(decodeOrganismCode('TOOLONG!'), null, 'long string returns null');
-is(decodeOrganismCode('XXABCD'), null, 'invalid allele returns null');
+is(decodeOrganismCode('SHORT'), null, 'short string (5) returns null');
+is(decodeOrganismCode('TOOLONG12'), null, 'long string (9) returns null');
+is(decodeOrganismCode('XXXXXXXX'), null, 'invalid alleles return null');
 
-// Homeozygous encoding
+// Homozygous encoding
 var homoOrg = {
   id:'c2', name:'HomoOrg',
   phenotype:{color:'Red',pattern:'Solid',shape:'Round'},
-  genome:{color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}},
+  genome:{color:{allele1:'R',allele2:'R'}, pattern:{allele1:'S',allele2:'S'}, shape:{allele1:'O',allele2:'O'}, size:{allele1:'T',allele2:'T'}},
   generation:0, rarityScore:1, rarityLabel:'Common', parents:[], discovered:0, mutations:[]
 };
-is(encodeOrganismCode(homoOrg), 'RRSSOO', 'homozygous organism encodes to RRSSOO');
+is(encodeOrganismCode(homoOrg), 'RRSSOOTT', 'homozygous organism encodes to RRSSOOTT');
 
 // ── Done ──────────────────────────────────────────────────────────
 var total = passed + failed;

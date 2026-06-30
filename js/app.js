@@ -390,10 +390,9 @@ var _marketAdopted = false;
     if (!pA || !pB) { dom.oddsPanel.innerHTML = ''; return; }
     var odds = computeBreedingOdds(pA, pB);
     var html = '<div class="odds-title">Predicted outcomes</div><div class="odds-grid">';
-    var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
-    var geneTypes = ['color', 'pattern', 'shape'];
-    for (var gi = 0; gi < geneTypes.length; gi++) {
-      var gt = geneTypes[gi];
+    var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape', size: 'Size' };
+    for (var gi = 0; gi < GENE_TYPES.length; gi++) {
+      var gt = GENE_TYPES[gi];
       var outcomes = odds[gt];
       html += '<div class="odds-gene"><div class="odds-gene-label">' + geneLabels[gt] + '</div>';
       for (var trait in outcomes) {
@@ -637,6 +636,7 @@ var _marketAdopted = false;
             domInfo('color', 'Color') +
             domInfo('pattern', 'Pattern') +
             domInfo('shape', 'Shape') +
+            domInfo('size', 'Size') +
           '<div class="trait-row">' +
             '<span class="trait-label">Scent</span>' +
             '<span class="trait-value">' + expressScent(organism) + '</span>' +

@@ -390,6 +390,8 @@ section h2 {
 .card-rarity.rare      { background: rgba(210,153,34,.12); color: var(--gold); }
 .card-rarity.legendary { background: rgba(188,140,255,.12); color: var(--purple); }
 
+.trait-size { font-size: .78rem; opacity: .7; }
+
 .mutation-badge {
   position: absolute;
   top: .35rem;

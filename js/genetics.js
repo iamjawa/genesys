@@ -41,6 +41,19 @@ var GENES = {
 };
 
 var MUTATION_CHANCE = 0.03;
+var GENE_TYPES = ['color', 'pattern', 'shape', 'size'];
+
+GENES.size = {
+  name: 'Size',
+  baseAlleles: {
+    T: { trait: 'Tall',   dominant: true  },
+    B: { trait: 'Bushy', dominant: false },
+  },
+  mutationPool: [
+    { allele: 'D', trait: 'Dwarf', dominant: false },
+    { allele: 'W', trait: 'Wide',  dominant: false },
+  ],
+};
 
 function getAllAllelesForGene(geneType) {
   var gene = GENES[geneType];
@@ -81,9 +94,8 @@ function breed(parentA, parentB) {
   var genome = {};
   var mutations = [];
 
-  var geneTypes = ['color', 'pattern', 'shape'];
-  for (var g = 0; g < geneTypes.length; g++) {
-    var geneType = geneTypes[g];
+  for (var g = 0; g < GENE_TYPES.length; g++) {
+    var geneType = GENE_TYPES[g];
     var allele1 = pickRandomAllele(parentA.genome[geneType]);
     var allele2 = pickRandomAllele(parentB.genome[geneType]);
 
@@ -97,21 +109,21 @@ function breed(parentA, parentB) {
     genome[geneType] = { allele1: allele1, allele2: allele2 };
   }
 
-  var phenotype = {
-    color:  expressGene('color',   genome.color.allele1,   genome.color.allele2).trait,
-    pattern: expressGene('pattern', genome.pattern.allele1, genome.pattern.allele2).trait,
-    shape:  expressGene('shape',   genome.shape.allele1,   genome.shape.allele2).trait,
-  };
+  var phenotype = {};
+  for (var p = 0; p < GENE_TYPES.length; p++) {
+    var gt = GENE_TYPES[p];
+    phenotype[gt] = expressGene(gt, genome[gt].allele1, genome[gt].allele2).trait;
+  }
 
   return { genome: genome, phenotype: phenotype, mutations: mutations, hasMutation: mutations.length > 0 };
 }
 
 function calculateRarity(genome) {
   var score = 1;
-  var geneTypes = ['color', 'pattern', 'shape'];
-  for (var g = 0; g < geneTypes.length; g++) {
-    var geneType = geneTypes[g];
+  for (var g = 0; g < GENE_TYPES.length; g++) {
+    var geneType = GENE_TYPES[g];
     var ge = genome[geneType];
+    if (!ge) continue;
     var all = getAllAllelesForGene(geneType);
     var a1 = all[ge.allele1];
     var a2 = all[ge.allele2];
@@ -136,11 +148,11 @@ function getRarityLabel(score) {
 
 function getRarityBreakdown(genome) {
   var reasons = [];
-  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
-  var geneTypes = ['color', 'pattern', 'shape'];
-  for (var g = 0; g < geneTypes.length; g++) {
-    var geneType = geneTypes[g];
+  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape', size: 'Size' };
+  for (var g = 0; g < GENE_TYPES.length; g++) {
+    var geneType = GENE_TYPES[g];
     var ge = genome[geneType];
+    if (!ge) continue;
     var all = getAllAllelesForGene(geneType);
     var a1 = all[ge.allele1];
     var a2 = all[ge.allele2];
@@ -211,14 +223,13 @@ function expressTexture(organism) {
 }
 
 function generateRandomGenome() {
-  var geneTypes = ['color', 'pattern', 'shape'];
   var genome = {};
-  for (var g = 0; g < geneTypes.length; g++) {
-    var all = getAllAllelesForGene(geneTypes[g]);
+  for (var g = 0; g < GENE_TYPES.length; g++) {
+    var all = getAllAllelesForGene(GENE_TYPES[g]);
     var codes = Object.keys(all);
     var a1 = codes[Math.floor(Math.random() * codes.length)];
     var a2 = codes[Math.floor(Math.random() * codes.length)];
-    genome[geneTypes[g]] = { allele1: a1, allele2: a2 };
+    genome[GENE_TYPES[g]] = { allele1: a1, allele2: a2 };
   }
   return genome;
 }
@@ -241,11 +252,10 @@ function getSynergyEffects(parentA, parentB) {
 
 function computeBreedingOdds(parentA, parentB) {
   var result = {};
-  var geneTypes = ['color', 'pattern', 'shape'];
-  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape' };
+  var geneLabels = { color: 'Color', pattern: 'Pattern', shape: 'Shape', size: 'Size' };
 
-  for (var g = 0; g < geneTypes.length; g++) {
-    var geneType = geneTypes[g];
+  for (var g = 0; g < GENE_TYPES.length; g++) {
+    var geneType = GENE_TYPES[g];
     var pa = parentA.genome[geneType];
     var pb = parentB.genome[geneType];
     var combos = [
