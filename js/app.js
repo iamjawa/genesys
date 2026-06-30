@@ -227,7 +227,16 @@ var _marketAdopted = false;
   function renderCollection() {
     dom.collection.innerHTML = '';
     var sortBy = dom.sortSelect ? dom.sortSelect.value : 'discovered';
-    var all = sortBy === 'discovered' ? store.getAll() : store.getAllSorted(sortBy);
+    var all;
+    if (sortBy === 'scent' || sortBy === 'texture') {
+      all = store.getAll().sort(function(a, b) {
+        var va = sortBy === 'scent' ? expressScent(a) : expressTexture(a);
+        var vb = sortBy === 'scent' ? expressScent(b) : expressTexture(b);
+        return va.localeCompare(vb);
+      });
+    } else {
+      all = sortBy === 'discovered' ? store.getAll() : store.getAllSorted(sortBy);
+    }
     if (sortBy === 'discovered') all = all.reverse();
     if (!all.length) {
       dom.collection.innerHTML = '<div class="empty-state">No organisms yet. Start breeding!</div>';
