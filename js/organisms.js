@@ -21,7 +21,7 @@ function createOrganism(genome, parentIds, generation, name) {
   var rarityScore = calculateRarity(genome);
   return {
     id: generateId(),
-    name: name || phenotype.color + ' ' + phenotype.shape + ' #' + _idCounter,
+    name: name || phenotype.color + ' ' + phenotype.shape + (phenotype.size ? ' (' + phenotype.size + ')' : '') + ' #' + _idCounter,
     genome: JSON.parse(JSON.stringify(genome)),
     phenotype: { color: phenotype.color, pattern: phenotype.pattern, shape: phenotype.shape, size: phenotype.size },
     parents: parentIds.slice(),
